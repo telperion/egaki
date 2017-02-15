@@ -75,8 +75,8 @@ void GenerateInternals(int shapeCount)
   
   for (int i = 0; i < shapeCount; i++)
   {
-    double nBase = 0; // (Math.random() - 0.5) * PI/3;
-    double vBase = 0; // (Math.random() - 0.5) * 2*PI;
+    double nBase = (Math.random() - 0.5) * PI/2;
+    double vBase = (Math.random() - 0.5) * 2*PI;
     double rBase = Math.random() * radius * 0.5;
   
     Viol s = new Viol();
@@ -94,7 +94,7 @@ void GenerateInternals(int shapeCount)
         (int)(s.p[1] * 170) + 16,
         (int)(s.p[1] * 85), 
         (int)(s.p[1] * 255), 
-        (int)(s.p[0] * 153) + 102
+        (int)(s.p[0] * 204) + 51
         );
       strokeWeight(3);
       strokeCap(ROUND);
@@ -104,12 +104,12 @@ void GenerateInternals(int shapeCount)
     s.tri.beginShape();
     for (int j = 0; j < 3; j++)
     {
-      double nAdd = (Math.random() - 0.5) * PI/2;
-      double vAdd = (Math.random() - 0.5) * PI*2;
+      double nAdd = (Math.random() - 0.5) * PI/6;
+      double vAdd = (Math.random() - 0.5) * PI/3;
       double rAdd =  Math.random()        * radius * 0.8;
       
       double n = Math.max(Math.min(PI/4  , nBase + nAdd), -PI/4);
-      double v = Math.max(Math.min(PI    , vBase + vAdd), -PI);
+      double v =                           vBase + vAdd;
       double r = Math.max(Math.min(radius, rBase + rAdd), 0);
       double u = n;
       
@@ -139,18 +139,18 @@ void GenerateInternals(int shapeCount)
 
 void setup() 
 {
-  size(1800, 1200, P3D);
+  size(960, 720, P3D);
   majorAxis = max(width, height);
   minorAxis = min(width, height);
 //  noLoop();
   savingVideo = true;
   resettingInternals = false;
   frame = 0;
-  totalFrames = 112;
-  inflection = 28;
+  totalFrames = 120;
+  inflection = 15;
   tween = 0;
   reroll = 0;
-  nInternals = 30;
+  nInternals = 60;
   radius = minorAxis * 0.8;
   
   GenerateInternals(nInternals);
@@ -176,7 +176,8 @@ void draw()
 {
   tween = (float)frame / (float)totalFrames;
   background(0, 0, 0, 0);
-  // hint(DISABLE_DEPTH_MASK);
+  hint(DISABLE_DEPTH_SORT);
+  hint(DISABLE_DEPTH_MASK);
   camera(width/2, height/2, minorAxis/2, width/2, height/2, 0, 0, 1, 0);
   pointLight(204, 51, 255, width/2, height/2, majorAxis/2);
   
@@ -204,7 +205,7 @@ void draw()
   
   if (savingVideo)
   {
-    save(String.format("frames/wow-%02d-%03d.png", reroll, frame));
+    save(String.format("frames/wow-%03d-%02d.png", frame, reroll));
   }
   
   if (frame % inflection == inflection-1)
