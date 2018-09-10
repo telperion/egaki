@@ -6,6 +6,24 @@ void setup()
   background(0);
 }
 
+float sigmata(float x, float p)
+{
+  // Tailor f(x) = tanh(px) - mx to transition tighter or looser.
+  // p is a stretching parameter - higher p, tighter transition.
+  // p -> 0   approaches a cubic transition.
+  // p -> inf approaches a  step transition.
+  x = 2*x-1;
+  p = 1/p;
+  
+  float d = sqrt(1+p);
+  float denom = d*d*d;
+  float q = p/denom;
+    
+  float f_defAsOddFunc = denom * (x/sqrt(x*x+p) - q*x);
+  //System.out.println(String.format("%.6f, %.6f", f_defAsOddFunc, f_scale));
+  return f_defAsOddFunc*0.5f + 0.5f;  
+}
+
 void draw()
 {
   background(0);
@@ -16,8 +34,12 @@ void draw()
   scale(3, 3, 1);
   rotateX(0.1 * PI);
   
+  float sp = (1 + 9*mouseX/width);
+  float s1 = sigmata(((frameCount +  0)%60)/60.0f, sp);
+  float s2 = sigmata(((frameCount + 30)%60)/60.0f, sp);
+  
   pushMatrix();
-  rotateY(0.01 * PI * frameCount);
+  rotateY(PI * s1);
   
     pushMatrix();
     //rotateZ(0.5 * PI);
@@ -48,7 +70,7 @@ void draw()
     
   
   pushMatrix();
-  rotateY(-0.01 * PI * frameCount);
+  rotateY(-PI * s2);
   
     pushMatrix();
     //rotateZ(0.5 * PI);
@@ -67,5 +89,5 @@ void draw()
   popMatrix();
   
   
-  saveFrame("frames/####.png");
+  //saveFrame("frames/####.png");
 }
