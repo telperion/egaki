@@ -1,12 +1,13 @@
 PShape emblem;
-int FP1 = int(240 * sqrt( 7));
-int FP2 = int(240 * sqrt( 2));
-int FP3 = int(240 * sqrt( 1));
-int FP4 = int(240 * sqrt( 5));
-int FP5 = int(240 * sqrt(11));
-int FPGCD = 60;
+int FP1 = int( 60 * sqrt( 7));
+int FP2 = int( 60 * sqrt( 2));
+int FP3 = int( 60 * sqrt( 3));
+int FP4 = int( 60 * sqrt( 5));
+int FP5 = int(120 * sqrt( 1));
+int FPGCD = 120+1;
 
-int sortPass = 120;
+int sortPass = 32;
+int decimate = 4; 
 
 PShader colorShader; 
 PShader sortShader;
@@ -73,7 +74,7 @@ void draw()
   
   if (frameCount % sortPass == 0)
   {
-    background(color(#7F7F7F));
+    background(color(#4C4C4C));
     
     stroke(color(255, 127, 0, 25));
     fill(color(#FFE600));
@@ -163,17 +164,19 @@ void draw()
   }
   
   //sortShader.set("jumpSize",  frameCount % sortPass  + 0); 
-  sortShader.set("jumpSize", 0);
+  sortShader.set("jumpSize", (sortPass - (frameCount % sortPass)) / decimate + (decimate - frameCount % decimate));
   sortShader.set("oddLines", (frameCount % sortPass) % 2);
   filter(sortShader);
   
-  if (frameCount % sortPass == sortPass - 1)
+  //saveFrame("frames/######.png");
+  
+  if (frameCount % sortPass == 4*decimate)
   {
-    //saveFrame("frames/######.png");
+    saveFrame("frames/######.png");
+  }
     
-    if ((frameCount+1) / sortPass >= FPGCD)
-    {
-      //exit();
-    }
+  if ((frameCount+1) / sortPass >= FPGCD)
+  {
+    exit();
   }
 }

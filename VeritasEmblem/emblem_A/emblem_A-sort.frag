@@ -52,14 +52,18 @@ void main() {
     wRecon = gl_FragCoord.y;
   }
 
-  vec4 color = textureLod(texture, vec2(gl_FragCoord.x / resolution.x, wRecon / resolution.y), 0);
-  vec4 compr = textureLod(texture, vec2(gl_FragCoord.x / resolution.x, wAlias / resolution.y), 0);
+  vec4 color = textureLod(texture, vec2(gl_FragCoord.x / resolution.x, (wRecon+0.0) / resolution.y), 0);
+  vec4 compr = textureLod(texture, vec2(gl_FragCoord.x / resolution.x, (wAlias+0.0) / resolution.y), 0);
   float grey0 = dot(color, greyscaler);
   float grey1 = dot(compr, greyscaler);
   vec4 choice;
 
   // Sort lowest to highest.
-  if ((grey1 < grey0) == (wAlias < wRecon))
+  if (wAlias < 0 || wAlias > resolution.y)
+  {
+    choice = color;
+  }
+  else if ((grey0 < grey1) == (wAlias < wRecon))
   {
     choice = compr;
   }

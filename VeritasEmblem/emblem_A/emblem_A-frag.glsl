@@ -46,7 +46,8 @@ void main() {
   vec4 color = texture2D(texture, vertTexCoord.st);
   float grey = dot(color, greyscaler);
 
-  //gl_FragColor = vec4(grey * HueToBasis(time + grey*0.1), 1.0);
+  gl_FragColor = vec4(grey * HueToBasis(time + grey*0.5), 1.0);
+  /*
   if (
     (vertTexCoord.s > 0.2 && vertTexCoord.s < 0.7) &&
     (vertTexCoord.t > vertTexCoord.s) &&
@@ -67,4 +68,5 @@ void main() {
   {
     gl_FragColor = vec4(vec3(0.5), 1.0);
   }
+  */
 }
