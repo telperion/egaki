@@ -3,28 +3,35 @@ int nSegs = 0;
 int nTris = 0;
 int nBasicTris = 0;
 int maxTrisPerPt = 120;
+int maxSegsPerPt = 60;
 class Point
 {
   public float x;
   public float y;
-  public float p;
   public float m;
   public boolean v;
-  public Tri a[];
-  public Seg b[];
-  public int n;
+  public Tri t[];
+  public Seg s[];
+  public int nt;
+  public int ns;
   public int i;
 };
 class Seg
 {
-  public Point points[];
+  public Point p[];
+  public Tri t[];
+  public int np;
+  public int nt;
   public float m;
   public boolean v;
   public int i;
 };
 class Tri
 {
-  public Point points[];
+  public Point p[];
+  public Seg s[];
+  public int np;
+  public int ns;
   public boolean v;
   public int i;
 };
@@ -43,8 +50,8 @@ float P2PDistance(Point p1, Point p2)
 
 float P2SDistance(Point p, Seg s)
 {
-  float xmid = (s.points[0].x + s.points[1].x) * 0.5;
-  float ymid = (s.points[0].y + s.points[1].y) * 0.5;
+  float xmid = (s.p[0].x + s.p[1].x) * 0.5;
+  float ymid = (s.p[0].y + s.p[1].y) * 0.5;
   
   float xofs = p.x - xmid;
   float yofs = p.y - ymid;
@@ -59,9 +66,19 @@ void AddSegsFromTri(Tri t, int skipFirst)
     segs[nSegs] = new Seg();
     segs[nSegs].v = false;
     segs[nSegs].i = nSegs;
-    segs[nSegs].points = new Point[2];
-    segs[nSegs].points[0] = t.points[ k   %3];
-    segs[nSegs].points[1] = t.points[(k+1)%3];
+    
+    Point p0 = t.p[ k   %3];
+    Point p1 = t.p[(k+1)%3];
+    segs[nSegs].p = new Point[2];
+    segs[nSegs].p[0] = p0;
+    segs[nSegs].p[1] = p1;
+    p0.s[p0.ns++] = segs[nSegs];
+    p1.s[p1.ns++] = segs[nSegs];    
+    
+    segs[nSegs].t = new Tri[2];
+    segs[nSegs].t[segs[nSegs].nt++] = t;
+    t.s[t.ns++] = segs[nSegs];
+    
     nSegs++;
   }  
 }
@@ -71,16 +88,20 @@ void AddTriangle(Point[] ptsArray, int ind1, int i, int ind2)
 {
   print("Adding triangle ", nTris, " (", ptsArray[ind1].i, ", ", ptsArray[i].i, ", ", ptsArray[ind2].i, ")\n");
   basicConnections[nTris] = new Tri();
-  basicConnections[nTris].s = false;
+  basicConnections[nTris].v = false;
   basicConnections[nTris].i = nTris;
-  basicConnections[nTris].points = new Point[3];
-  basicConnections[nTris].points[0] = ptsArray[ind1];
-  basicConnections[nTris].points[1] = ptsArray[i];
-  basicConnections[nTris].points[2] = ptsArray[ind2];
-  ptsArray[ind1].a[ptsArray[ind1].n++] = basicConnections[nTris];
-  ptsArray[i   ].a[ptsArray[i   ].n++] = basicConnections[nTris];
-  ptsArray[ind2].a[ptsArray[ind2].n++] = basicConnections[nTris];  
+  
+  basicConnections[nTris].p = new Point[3];
+  basicConnections[nTris].p[0] = ptsArray[ind1];
+  basicConnections[nTris].p[1] = ptsArray[i];
+  basicConnections[nTris].p[2] = ptsArray[ind2];
+  ptsArray[ind1].t[ptsArray[ind1].nt++] = basicConnections[nTris];
+  ptsArray[i   ].t[ptsArray[i   ].nt++] = basicConnections[nTris];
+  ptsArray[ind2].t[ptsArray[ind2].nt++] = basicConnections[nTris];
+  
+  basicConnections[nTris].s = new Seg[3];
   AddSegsFromTri(basicConnections[nTris], 0);
+  
   nTris++;
 }
 
@@ -88,59 +109,82 @@ void AddTriangle(Point[] ptsArray)
 {
   print("Adding triangle ", nTris, " (", ptsArray[0].i, ", ", ptsArray[1].i, ", ", ptsArray[2].i, ")\n");
   basicConnections[nTris] = new Tri();
-  basicConnections[nTris].s = false;
+  basicConnections[nTris].v = false;
   basicConnections[nTris].i = nTris;
-  basicConnections[nTris].points = new Point[3];
-  basicConnections[nTris].points[0] = ptsArray[0];
-  basicConnections[nTris].points[1] = ptsArray[1];
-  basicConnections[nTris].points[2] = ptsArray[2];
-  ptsArray[0].a[ptsArray[0].n++] = basicConnections[nTris];
-  ptsArray[1].a[ptsArray[1].n++] = basicConnections[nTris];
-  ptsArray[2].a[ptsArray[2].n++] = basicConnections[nTris];  
+  
+  basicConnections[nTris].p = new Point[3];
+  basicConnections[nTris].p[0] = ptsArray[0];
+  basicConnections[nTris].p[1] = ptsArray[1];
+  basicConnections[nTris].p[2] = ptsArray[2];
+  ptsArray[0].t[ptsArray[0].nt++] = basicConnections[nTris];
+  ptsArray[1].t[ptsArray[1].nt++] = basicConnections[nTris];
+  ptsArray[2].t[ptsArray[2].nt++] = basicConnections[nTris];  
+  
+  basicConnections[nTris].s = new Seg[3];
   AddSegsFromTri(basicConnections[nTris], 0);
+  
   nTris++;
 }
 
 void AddTriangle(Point newTip, Seg oldSeg)
 {
-  print("Adding triangle ", nTris, " (", newTip.i, " ^ ", oldSeg.points[0].i, " _ ", oldSeg.points[1].i, ")\n");
+  print("Adding triangle ", nTris, " (", newTip.i, " ^ ", oldSeg.p[0].i, " _ ", oldSeg.p[1].i, ")\n");
   basicConnections[nTris] = new Tri();
-  basicConnections[nTris].s = false;
+  basicConnections[nTris].v = false;
   basicConnections[nTris].i = nTris;
-  basicConnections[nTris].points = new Point[3];
-  basicConnections[nTris].points[0] = oldSeg.points[0];
-  basicConnections[nTris].points[1] = oldSeg.points[1];
-  basicConnections[nTris].points[2] = newTip;
-  oldSeg.points[0].a[oldSeg.points[0].n++] = basicConnections[nTris];
-  oldSeg.points[1].a[oldSeg.points[1].n++] = basicConnections[nTris];
-            newTip.a[          newTip.n++] = basicConnections[nTris];    
+  
+  basicConnections[nTris].p = new Point[3];
+  basicConnections[nTris].p[0] = oldSeg.p[0];
+  basicConnections[nTris].p[1] = oldSeg.p[1];
+  basicConnections[nTris].p[2] = newTip;
+  oldSeg.p[0].t[oldSeg.p[0].nt++] = basicConnections[nTris];
+  oldSeg.p[1].t[oldSeg.p[1].nt++] = basicConnections[nTris];
+       newTip.t[     newTip.nt++] = basicConnections[nTris];    
+  
+  basicConnections[nTris].s = new Seg[3];
+  basicConnections[nTris].s[0] = oldSeg;
+  oldSeg.t[oldSeg.nt++] = basicConnections[nTris];
   AddSegsFromTri(basicConnections[nTris], 1);
+  
   nTris++;
 }
 
-int NextCCW(Point[] triPts, int i)
+void AddTriangle(Seg s0, Seg s1)
 {
-  float d1 = triPts[(i+1)%3].p - triPts[i].p;
-  float d2 = triPts[(i+2)%3].p - triPts[i].p;
+  int i0 = -1 + int(s0.p[0] == s1.p[0]) + int(s0.p[0] == s1.p[1]) + 2*int(s0.p[1] == s1.p[0]) + 2*int(s0.p[1] == s1.p[1]);
+  int i1 = -1 + int(s1.p[0] == s0.p[0]) + int(s1.p[0] == s0.p[1]) + 2*int(s1.p[1] == s0.p[0]) + 2*int(s1.p[1] == s0.p[1]);
+  if (i0 == -1 || i1 == -1) {return;}
+  if (i0 >=  2 || i1 >=  2) {return;}
   
-  d1 -= 2*PI;  while (d1 < 0) {d1 += 2*PI;}
-  d2 -= 2*PI;  while (d2 < 0) {d2 += 2*PI;}
+  print("Adding triangle ", nTris, " (", s0.p[0].i, ", ", s0.p[1].i, ") v (", s1.p[0].i, ", ", s1.p[1].i, ")\n");
+  basicConnections[nTris] = new Tri();
+  basicConnections[nTris].v = false;
+  basicConnections[nTris].i = nTris;
   
-  return (d1 < d2) ? (i+1)%3 : (i+2)%3;
+  basicConnections[nTris].p = new Point[3];
+  basicConnections[nTris].p[0] = s0.p[1-i0];
+  basicConnections[nTris].p[1] = s0.p[  i0];  // == s1.p[i1]
+  basicConnections[nTris].p[2] = s1.p[1-i1];
+  s0.p[1-i0].t[s0.p[1-i0].nt++] = basicConnections[nTris];
+  s0.p[  i0].t[s0.p[  i0].nt++] = basicConnections[nTris];
+  s1.p[1-i1].t[s1.p[1-i1].nt++] = basicConnections[nTris];    
+  
+  basicConnections[nTris].s = new Seg[3];
+  basicConnections[nTris].s[0] = s0;
+  basicConnections[nTris].s[1] = s1;
+  s0.t[s0.nt++] = basicConnections[nTris];
+  s1.t[s1.nt++] = basicConnections[nTris];
+  AddSegsFromTri(basicConnections[nTris], 2);
+  
+  nTris++;
 }
 
-boolean CCW(Point less, Point more)
-{
-  float pp = more.p - less.p;
-  pp -= 2*PI;  while (pp < 0) {pp += 2*PI;}
-  return (pp < PI);
-}
 
 int IdenTri(Tri t, Point p)
 {
   for (int i = 0; i < 3; i++)
   {
-    if (t.points[i] == p)
+    if (t.p[i] == p)
     {
       return i;
     }
@@ -156,7 +200,7 @@ void SortPts()
     int ind = 0;
     for (int j = 0; j < nPts; j++)
     {
-      if (!pts[j].s)
+      if (!pts[j].v)
       {
         if (pts[j].m > mm)
         {
@@ -167,7 +211,7 @@ void SortPts()
     }
     
     ptsSort[i] = pts[ind];
-    pts[ind].s = true;
+    pts[ind].v = true;
     //print(ptsSort[i].m, "\n");
   }
 }
@@ -180,7 +224,7 @@ void SortSegs(Point p)
     int ind = 0;
     for (int j = 0; j < nSegs; j++)
     {
-      if (!segs[j].s)
+      if (!segs[j].v)
       {
         segs[j].m = P2SDistance(p, segs[j]);
         if (segs[j].m > mm)
@@ -191,13 +235,13 @@ void SortSegs(Point p)
       }
     }
     
-    segs[ind].s = true;
+    segs[ind].v = true;
     segsSort[i] = segs[ind];
     print(segsSort[i].m, "\n");
   }
   for (int i = 0; i < nSegs; i++)
   {
-    segs[i].s = false;
+    segs[i].v = false;
   }
 }
 
@@ -244,26 +288,26 @@ Seg SelectNearestSeg(Point p)
       }
       
       
-      if (segsSort[i].points[0] != segsSort[j].points[0] && 
-          segsSort[i].points[0] != segsSort[j].points[1])
+      if (segsSort[i].p[0] != segsSort[j].p[0] && 
+          segsSort[i].p[0] != segsSort[j].p[1])
       {
-        if (Intersects(                    p, segsSort[i].points[0],
-                       segsSort[j].points[0], segsSort[j].points[1]) &&
-            Intersects(segsSort[j].points[0], segsSort[j].points[1],
-                                           p, segsSort[i].points[0]))
+        if (Intersects(               p, segsSort[i].p[0],
+                       segsSort[j].p[0], segsSort[j].p[1]) &&
+            Intersects(segsSort[j].p[0], segsSort[j].p[1],
+                                      p, segsSort[i].p[0]))
         {
           cutsThrough = true;
           break;
         }
       }
       
-      if (segsSort[i].points[1] != segsSort[j].points[0] && 
-          segsSort[i].points[1] != segsSort[j].points[1])
+      if (segsSort[i].p[1] != segsSort[j].p[0] && 
+          segsSort[i].p[1] != segsSort[j].p[1])
       {
-        if (Intersects(                    p, segsSort[i].points[1],
-                       segsSort[j].points[0], segsSort[j].points[1]) &&
-            Intersects(segsSort[j].points[0], segsSort[j].points[1],
-                                           p, segsSort[i].points[1]))
+        if (Intersects(               p, segsSort[i].p[1],
+                       segsSort[j].p[0], segsSort[j].p[1]) &&
+            Intersects(segsSort[j].p[0], segsSort[j].p[1],
+                                      p, segsSort[i].p[1]))
         {
           cutsThrough = true;
           break;
@@ -297,11 +341,14 @@ void setup()
     pts[i] = new Point();
     pts[i].x = random(-1, 1);
     pts[i].y = random(-1, 1);
-    pts[i].p = atan2(pts[i].y, pts[i].x);
     pts[i].m = sqrt(pts[i].x * pts[i].x + pts[i].y * pts[i].y);
-    pts[i].s = false;
-    pts[i].a = new Tri[maxTrisPerPt];
-    pts[i].n = 0;
+    pts[i].v = false;
+    
+    pts[i].t = new Tri[maxTrisPerPt];
+    pts[i].nt = 0;
+    pts[i].s = new Seg[maxSegsPerPt];
+    pts[i].ns = 0;
+    
     pts[i].i = i;
   }
   
@@ -324,101 +371,61 @@ void setup()
     }
     else
     {
-      print("### dude idek what hape\n");
+      print("### dude idek what hape (glassy)\n");
       break;
     }
   }
   nBasicTris = nTris;
   
-  Point startPt = ptsSort[0];
-  Point edgePts[] = new Point[3];
-  Tri lastTri = basicConnections[nTris-2];
-  Tri traverse = lastTri;
-  lastTri.s = true;
-  edgePts[0] = lastTri.points[1];          // Spike
-  int pivot  = NextCCW(lastTri.points, 1); // Pivot
-  edgePts[1] = lastTri.points[pivot];
-  edgePts[2] = lastTri.points[2 - pivot];  // proto-Scout
-    
-  for (int i = 0; i < 0 /*nPts*/; i++)
-  {
-    // The third edge point (Scout) is discovered by finding an external edge shared with the pivot
-    // by sweeping through connected triangles until there is no meeting on the venture side.
-    // -  If the third and first edge points are lower in magnitude than the pivot,
-    //    move along: pivot becomes spike, scout becomes pivot, and a new scout is chosen.
-    // -  If the pivot is outside the line drawn between spike and scout,
-    //    move along: pivot becomes spike, scout becomes pivot, and a new scout is chosen.
-    //        TODO: field this case better so spikes don't remain spiky lmao
-    int j = 0;
-    while(j < edgePts[1].n)
+  // Draw extra border triangles.  
+  // First, identify all border points.
+  Point borderPts[] = new Point[nPts];
+  int nBP = 0;
+  borderPts[0] = ptsSort[0];
+  
+  for (int i = 1; i < nPts; i++)
+  {    
+    // Which other segment joined to this point has only one triangle?
+    int nextTraveler = -1;
+    for (int j = 0; j < borderPts[i-1].ns; j++)
     {
-      Tri t = edgePts[1].a[j];
-      int idScout = IdenTri(t, edgePts[2]);
-      print("Test triangle ", t.i, " (", 
-        t.points[0].i, ", ",
-        t.points[1].i, ", ",
-        t.points[2].i,
-        "): ", t.s ? "visited" : "lonely!", " w/ scout @ ", idScout, "\n");
-      if (!t.s && idScout >= 0)
+      Seg potentialSeg = borderPts[i-1].s[j];
+      print("--- Segment ", potentialSeg.i, " (", potentialSeg.p[0].i, " -> ", potentialSeg.p[1].i, ") w/ ", potentialSeg.nt, " tris\n");
+      Point nextPt;
+      if (potentialSeg.p[0] == borderPts[i-1])
       {
-        print(">>> Pivot\n"); 
-        int idPivot = IdenTri(t, edgePts[1]);
-        if (idPivot == idScout)
-        {
-          print("!!! What is this triangle doing !!! (Doubled point)\n");
-          break;
-        }
-        else if (idPivot < 0)
-        {
-          print("!!! What is this triangle doing !!! (Emancipated pivot)\n");
-          break;
-        }
-        edgePts[2] = t.points[3 - idScout - idPivot];         
-        print("--- scout @ ", idScout, ", pivot @ ", idPivot, "\n");
-        traverse = t;
-        t.s = true;
-        j = 0;
+        nextPt = potentialSeg.p[1];
       }
       else
       {
-        j++;
+        nextPt = potentialSeg.p[0];
       }
-    }
-    for (j = 0; j < edgePts[1].n; j++)
-    {
-      edgePts[1].a[j].s = false;
-    }
-    
-    if (edgePts[2] == startPt)
-    {
-      print("!!! Once around!\n");
-      //break;
-    }
-    if ((edgePts[1].m - edgePts[0].m)/(edgePts[1].p - edgePts[0].p) >
-        (edgePts[2].m - edgePts[0].m)/(edgePts[2].p - edgePts[0].p))
-    {
-      print("### Pivot outside\n");
-      edgePts[0] = edgePts[1];
-      edgePts[1] = edgePts[2];
-      edgePts[2] = traverse.points[3 - IdenTri(traverse, edgePts[0]) - IdenTri(traverse, edgePts[1])];
-    }
-    else
-    {
-      if ((edgePts[0] != edgePts[1]) &&
-          (edgePts[0] != edgePts[2]) &&
-          (edgePts[1] != edgePts[2]))
+      
+      if (i > 1 && nextPt == borderPts[i-2])
       {
-        AddTriangle(edgePts);
+        print("+++ No backtracking!\n");
       }
-      Point swap = edgePts[1];
-      edgePts[1] = edgePts[2];
-      edgePts[2] = swap;
+      else if (potentialSeg.nt < 2)
+      {
+        print("vvv Move on Segment ", potentialSeg.i, "\n");        
+        print("--- Move from point ", borderPts[i-1].i, " to ", nextPt.i, " along Segment ", potentialSeg.i, "\n");
+        nextTraveler = j;
+        borderPts[i] = nextPt;
+        break;
+      }
+    }
+    nBP = i+1;
+    
+    if (borderPts[i] == borderPts[0])
+    {
+      print("### Returned to start! (border)\n");
+      break;
     }
     
-    if (nTris - nBasicTris > 2)
+    if (nextTraveler == -1)
     {
-      //print("Cutting off triangle production early!\n");
-      //break;
+      print("### dude idek what hape (border)\n");
+      break;
     }
   }
 }
@@ -458,7 +465,7 @@ void draw()
       pushMatrix();
       translate(ptsSort[i].x * 450, ptsSort[i].y * 450);
       pushMatrix();
-      rotateZ(ptsSort[i].p + PI*0.5);
+      rotateZ(atan2(ptsSort[i].y, ptsSort[i].x) + PI*0.5);
       triangle(
          0.5 * tsz, -sqrt(3)/6*tsz,
         -0.5 * tsz, -sqrt(3)/6*tsz,
@@ -494,9 +501,9 @@ void draw()
       stroke(color(85, 255, 170, 170 * float(nPts-i)/float(nTris)));
       //translate(0.0, 0.0, (225.0 + 225.0*cos(0.003 * PI * frameCount)) / nTris);
       triangle(
-        basicConnections[i].points[0].x * 450, basicConnections[i].points[0].y * 450,
-        basicConnections[i].points[1].x * 450, basicConnections[i].points[1].y * 450,
-        basicConnections[i].points[2].x * 450, basicConnections[i].points[2].y * 450
+        basicConnections[i].p[0].x * 450, basicConnections[i].p[0].y * 450,
+        basicConnections[i].p[1].x * 450, basicConnections[i].p[1].y * 450,
+        basicConnections[i].p[2].x * 450, basicConnections[i].p[2].y * 450
         );
     }
   popMatrix();
@@ -504,5 +511,8 @@ void draw()
   
   popMatrix();
   
-  //saveFrame("test-####.png");
+  if (frameCount == 0)
+  {
+    saveFrame("test-####.png");
+  }
 }
