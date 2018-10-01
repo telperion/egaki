@@ -1,4 +1,4 @@
-int nPts = 30;
+int nPts = 100;
 int nSegs = 0;
 int nTris = 0;
 int nBasicTris = 0;
@@ -87,7 +87,7 @@ void AddSegsFromTri(Tri t, int skipFirst)
 
 void AddTriangle(Point[] ptsArray, int ind1, int i, int ind2)
 {
-  print("Adding triangle ", nTris, " (", ptsArray[ind1].i, ", ", ptsArray[i].i, ", ", ptsArray[ind2].i, ")\n");
+//  print("Adding triangle ", nTris, " (", ptsArray[ind1].i, ", ", ptsArray[i].i, ", ", ptsArray[ind2].i, ")\n");
   basicConnections[nTris] = new Tri();
   basicConnections[nTris].v = false;
   basicConnections[nTris].i = nTris;
@@ -102,13 +102,11 @@ void AddTriangle(Point[] ptsArray, int ind1, int i, int ind2)
   
   basicConnections[nTris].s = new Seg[3];
   AddSegsFromTri(basicConnections[nTris], 0);
-  
-  nTris++;
 }
 
 void AddTriangle(Point[] ptsArray)
 {
-  print("Adding triangle ", nTris, " (", ptsArray[0].i, ", ", ptsArray[1].i, ", ", ptsArray[2].i, ")\n");
+//  print("Adding triangle ", nTris, " (", ptsArray[0].i, ", ", ptsArray[1].i, ", ", ptsArray[2].i, ")\n");
   basicConnections[nTris] = new Tri();
   basicConnections[nTris].v = false;
   basicConnections[nTris].i = nTris;
@@ -123,13 +121,11 @@ void AddTriangle(Point[] ptsArray)
   
   basicConnections[nTris].s = new Seg[3];
   AddSegsFromTri(basicConnections[nTris], 0);
-  
-  nTris++;
 }
 
 void AddTriangle(Point newTip, Seg oldSeg)
 {
-  print("Adding triangle ", nTris, " (", newTip.i, " ^ ", oldSeg.p[0].i, " _ ", oldSeg.p[1].i, ")\n");
+//  print("Adding triangle ", nTris, " (", newTip.i, " ^ ", oldSeg.p[0].i, " _ ", oldSeg.p[1].i, ")\n");
   basicConnections[nTris] = new Tri();
   basicConnections[nTris].v = false;
   basicConnections[nTris].i = nTris;
@@ -146,8 +142,6 @@ void AddTriangle(Point newTip, Seg oldSeg)
   basicConnections[nTris].s[0] = oldSeg;
   oldSeg.t[oldSeg.nt++] = basicConnections[nTris];
   AddSegsFromTri(basicConnections[nTris], 1);
-  
-  nTris++;
 }
 
 void AddTriangle(Seg s0, Seg s1)
@@ -157,7 +151,7 @@ void AddTriangle(Seg s0, Seg s1)
   if (i0 == -1 || i1 == -1) {return;}
   if (i0 >=  2 || i1 >=  2) {return;}
   
-  print("Adding triangle ", nTris, " (", s0.p[0].i, ", ", s0.p[1].i, ") v (", s1.p[0].i, ", ", s1.p[1].i, ")\n");
+//  print("Adding triangle ", nTris, " (", s0.p[0].i, ", ", s0.p[1].i, ") v (", s1.p[0].i, ", ", s1.p[1].i, ")\n");
   basicConnections[nTris] = new Tri();
   basicConnections[nTris].v = false;
   basicConnections[nTris].i = nTris;
@@ -176,8 +170,6 @@ void AddTriangle(Seg s0, Seg s1)
   s0.t[s0.nt++] = basicConnections[nTris];
   s1.t[s1.nt++] = basicConnections[nTris];
   AddSegsFromTri(basicConnections[nTris], 2);
-  
-  nTris++;
 }
 
 
@@ -238,7 +230,7 @@ void SortSegs(Point p)
     
     segs[ind].v = true;
     segsSort[i] = segs[ind];
-    print(segsSort[i].m, "\n");
+//    print(segsSort[i].m, "\n");
   }
   for (int i = 0; i < nSegs; i++)
   {
@@ -334,74 +326,25 @@ Seg SelectNearestSeg(Point p)
   return segsSort[ind];
 }
 
-void setup()
+int FillBorderOnce()
 {
-  size(720, 720, P3D);
-  
-  pts = new Point[nPts];
-  ptsSort = new Point[nPts];
-  basicConnections = new Tri[2*nPts-1];   // oh silt loam
-                                          // (nPts-1 will cover basic triangles but
-                                          // idk how many are required for rim. not more tho)
-  segs = new Seg[4*nPts+3];               // oh silt loam
-  segsSort = new Seg[4*nPts+3];
-  
-  for (int i = 0; i < nPts; i++)
-  {
-    pts[i] = new Point();
-    pts[i].x = random(-1, 1);
-    pts[i].y = random(-1, 1);
-    pts[i].m = sqrt(pts[i].x * pts[i].x + pts[i].y * pts[i].y);
-    pts[i].v = false;
-    
-    pts[i].t = new Tri[maxTrisPerPt];
-    pts[i].nt = 0;
-    pts[i].s = new Seg[maxSegsPerPt];
-    pts[i].ns = 0;
-    
-    pts[i].i = i;
-  }
-  
-  SortPts();
-  
-  nTris = 0;
-  
-  // Draw the first triangle.
-  AddTriangle(ptsSort, nPts-1, nPts-2, nPts-3);
-  
-  // "Broken glass" meshification.  
-  for (int i = nPts-4; i >= 0; i--)
-  {
-    Seg segNear = SelectNearestSeg(ptsSort[i]);
-    if (segNear != null)
-    {
-      float dist = P2SDistance(ptsSort[i], segNear);
-      print(">>> Point ", ptsSort[i].i, " matched with Segment ", segNear.i, " (dist ", dist, ")\n");
-      AddTriangle(ptsSort[i], segNear);
-    }
-    else
-    {
-      print("### dude idek what hape (glassy)\n");
-      break;
-    }
-  }
-  nBasicTris = nTris;
+  int startTris = nTris;
   
   // Draw extra border triangles.  
-  Point borderPts[] = new Point[nPts];
+  Point borderPts[] = new Point[nPts+1];
   int nBP = 0;
   borderPts[0] = ptsSort[0];
   Seg lastSeg = borderPts[0].s[0];
   Seg nextSeg = borderPts[0].s[1];
   
-  for (nBP = 1; nBP < nPts; nBP++)
+  for (nBP = 1; nBP <= nPts; nBP++)
   {    
     // Which other segment joined to this point has only one triangle?
     int nextTraveler = -1;
     for (int j = 0; j < borderPts[nBP-1].ns; j++)
     {
       nextSeg = borderPts[nBP-1].s[j];
-      print("--- Segment ", nextSeg.i, " (", nextSeg.p[0].i, " -> ", nextSeg.p[1].i, ") w/ ", nextSeg.nt, " tris\n");
+//      print("--- Segment ", nextSeg.i, " (", nextSeg.p[0].i, " -> ", nextSeg.p[1].i, ") w/ ", nextSeg.nt, " tris\n");
       Point nextPt;
       if (nextSeg.p[0] == borderPts[nBP-1])
       {
@@ -414,12 +357,12 @@ void setup()
       
       if (nBP > 1 && nextPt == borderPts[nBP-2])
       {
-        print("+++ No backtracking!\n");
+//        print("+++ No backtracking!\n");
       }
       else if (nextSeg.nt < 2)
       {
-        print("vvv Move on Segment ", nextSeg.i, "\n");        
-        print("--- Move from point ", borderPts[nBP-1].i, " to ", nextPt.i, " along Segment ", nextSeg.i, "\n");
+//        print("vvv Move on Segment ", nextSeg.i, "\n");        
+//        print("--- Move from point ", borderPts[nBP-1].i, " to ", nextPt.i, " along Segment ", nextSeg.i, "\n");
         nextTraveler = j;
         borderPts[nBP] = nextPt;
         break;
@@ -428,7 +371,7 @@ void setup()
     
     if (borderPts[nBP] == borderPts[0])
     {
-      print("### Returned to start! (border)\n");
+//      print("### Returned to start! (border)\n");
       break;
     }
     
@@ -446,7 +389,7 @@ void setup()
   {    
     if (borderPts[pivot].nt == 1)
     {
-      print("+++ Point ", borderPts[pivot].i, " is already the apex of a single triangle; must turn the corner\n"); 
+//      print("+++ Point ", borderPts[pivot].i, " is already the apex of a single triangle; must turn the corner\n"); 
       // Proceed and leave the farthest border point behind.
       trail = pivot;
       pivot = scout;
@@ -463,7 +406,7 @@ void setup()
           Intersects(    segs[i].p[0], segs[i].p[1],
                      borderPts[trail], borderPts[scout]))
       {
-        print("+++ Points ", borderPts[trail].i, " and ", borderPts[scout].i, " cut by (", segs[i].p[0].i, " -> ", segs[i].p[1].i, ")\n"); 
+//        print("+++ Points ", borderPts[trail].i, " and ", borderPts[scout].i, " cut by (", segs[i].p[0].i, " -> ", segs[i].p[1].i, ")\n"); 
         cutsThrough = true;
         break;
       }
@@ -493,13 +436,84 @@ void setup()
           nextSeg = borderPts[pivot].s[j];
         }
       }
-      print(">>> Points ", borderPts[trail].i, " and ", borderPts[scout].i, " can be joined, completing triangle from segments ", lastSeg.i, " and ", nextSeg.i, "\n");
+//      print(">>> Points ", borderPts[trail].i, " and ", borderPts[scout].i, " can be joined, completing triangle from segments ", lastSeg.i, " and ", nextSeg.i, "\n");
       
-      AddTriangle(lastSeg, nextSeg);
+      try   {AddTriangle(lastSeg, nextSeg); nTris++;}
+      catch (Exception e) {basicConnections[nTris] = null;}      
       
       // The point contained by both segments is no longer part of the border.
       pivot = scout;
       scout++;
+    }
+  }
+  
+  return nTris - startTris;
+}
+
+
+
+void setup()
+{
+  size(720, 720, P3D);
+  
+  pts = new Point[nPts];
+  ptsSort = new Point[nPts];
+  basicConnections = new Tri[3*nPts-1];   // oh silt loam
+  segs = new Seg[6*nPts+3];               // oh CLAY loam
+  segsSort = new Seg[6*nPts+3];
+  
+  for (int i = 0; i < nPts; i++)
+  {
+    pts[i] = new Point();
+    pts[i].x = random(-1, 1);
+    pts[i].y = random(-1, 1);
+    pts[i].m = sqrt(pts[i].x * pts[i].x + pts[i].y * pts[i].y);
+    pts[i].v = false;
+    
+    pts[i].t = new Tri[maxTrisPerPt];
+    pts[i].nt = 0;
+    pts[i].s = new Seg[maxSegsPerPt];
+    pts[i].ns = 0;
+    
+    pts[i].i = i;
+  }
+  
+  SortPts();
+  
+  nTris = 0;
+  
+  // Draw the first triangle.
+  try   {AddTriangle(ptsSort, nPts-1, nPts-2, nPts-3); nTris++;}
+  catch (Exception e) {basicConnections[nTris] = null;}      
+  
+  // "Broken glass" meshification.  
+  for (int i = nPts-4; i >= 0; i--)
+  {
+    Seg segNear = SelectNearestSeg(ptsSort[i]);
+    if (segNear != null)
+    {
+      float dist = P2SDistance(ptsSort[i], segNear);
+//      print(">>> Point ", ptsSort[i].i, " matched with Segment ", segNear.i, " (dist ", dist, ")\n");
+
+      try   {AddTriangle(ptsSort[i], segNear); nTris++;}
+      catch (Exception e) {basicConnections[nTris] = null;}
+    }
+    else
+    {
+      print("### dude idek what hape (glassy)\n");
+      break;
+    }
+  }
+  nBasicTris = nTris;
+  
+  // Border up.
+  for (int i = 0; i < sqrt(nPts); i++)
+  {
+    print("XXX Filling border (iteration ",i,")\n");
+    int trisAdded = FillBorderOnce();
+    if (3*trisAdded < sqrt(nPts))
+    {
+      break;
     }
   }
 }
@@ -507,7 +521,13 @@ void setup()
 
 void draw()
 {
+  float propShattering = 2.0;
+  float tween = max(frameCount % (propShattering*nTris) - nTris, 0) / ((propShattering-1)*nTris);
+  float tEaseOut = pow(tween,0.25);
+  float tEaseIn  = pow(tween,5);
+  
   background(0);
+  blendMode(ADD);
   
   color cf = 0x2200FF55;
   color cs = 0xAA55FFAA;
@@ -517,12 +537,12 @@ void draw()
   translate(width/2, height/2, 0);
   
   pushMatrix();
-  translate(0.0, 0.0, -300.0);
-  //rotateY(0.2 * PI * sin(0.001 * PI * frameCount));
-  //rotateX(0.1 * PI);
+  translate(0.0, 0.0, -450.0);
+  rotateY(0.2 * PI * sin(0.7 * PI * tEaseOut));
+  rotateX(0.1 * PI * tEaseOut);
   scale(1);
   
-  textSize(18);
+  textSize(24);
   textAlign(CENTER, CENTER);
   
   
@@ -553,8 +573,8 @@ void draw()
   popMatrix();
     
   pushMatrix();
-    translate(0.0, 0.0, -3.0);
-    for (int i = 0; i <= nBasicTris + (frameCount/60) % (nTris-nBasicTris); i++)
+    translate(0.0, 0.0, 3.0 - 600 * tEaseOut);
+    for (int i = 0; i < min(frameCount % (propShattering*nTris), nTris); i++)
     {
       /*
       print("Drawing triangle ", basicConnections[i].i, "\n");
@@ -564,28 +584,39 @@ void draw()
         basicConnections[i].points[2].i,
         ")\n");
       */
+      float tIndex = 1000 * ((i*tEaseIn) % 0.001); 
+      float tAlpha = 20 * (1.0 - tEaseIn) -
+                     15 * tIndex +
+                     0.2 * sin(0.002 * PI * frameCount);
+      tAlpha = (tAlpha > 1.0) ? 1.0 : (tAlpha < 0.0) ? 0.0 : tAlpha;
+      
+  
+      float prop = float(nTris-i)/nTris;
+      
       if (i >= nBasicTris)
       {
-        fill(color(0, 255 * float(i)/float(nTris), 0, 170));
+        fill(color(0, 255 * prop, 255, 85*tAlpha));
       }
       else
       {
-        fill(color(0, 255 * float(i)/float(nTris), 255, 85));
+        fill(color(0, 255 * prop, 255, 85*tAlpha));
       }
-      stroke(color(85, 255, 170, 170));
-      //translate(0.0, 0.0, (225.0 + 225.0*cos(0.003 * PI * frameCount)) / nTris);
-      triangle(
-        basicConnections[i].p[0].x * 450, basicConnections[i].p[0].y * 450,
-        basicConnections[i].p[1].x * 450, basicConnections[i].p[1].y * 450,
-        basicConnections[i].p[2].x * 450, basicConnections[i].p[2].y * 450
-        );
+      stroke(color(255, 255 * prop, 255, 170*prop*tAlpha));
+      pushMatrix();
+        translate(0.0, 0.0, 1200 * (1000 * (prop % 0.001)) * pow(prop, 0.3) * tEaseOut );
+        triangle(
+          basicConnections[i].p[0].x * 450, basicConnections[i].p[0].y * 450,
+          basicConnections[i].p[1].x * 450, basicConnections[i].p[1].y * 450,
+          basicConnections[i].p[2].x * 450, basicConnections[i].p[2].y * 450
+          );
+      popMatrix();
     }
   popMatrix();
     
   
   popMatrix();
   
-  if (frameCount == 0)
+  if (frameCount < propShattering*nTris)
   {
     saveFrame("test-####.png");
   }
