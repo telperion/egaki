@@ -61,6 +61,7 @@ float P2SDistance(Point p, Seg s)
 
 void AddSegsFromTri(Tri t, int skipFirst)
 {
+  t.ns = skipFirst;
   for (int k = 0 + skipFirst; k < 3; k++)
   {
     segs[nSegs] = new Seg();
@@ -250,11 +251,20 @@ void SortSegs(Point p)
 // Has to be done twice reflexively to check two segments.
 boolean Intersects(Point p1, Point p2, Point p3, Point p4)
 {  
+  if (p1 == p2 || p3 == p4)
+  {
+    return false;
+  }
+  if (p1 == p3 || p1 == p4 || p2 == p3 || p2 == p4)
+  {
+    return false;
+  }
+  
   float parametricIntersectionWithSegment = 
     ((p3.y - p1.y)*(p2.x - p1.x) - (p3.x - p1.x)*(p2.y - p1.y)) /
     ((p4.x - p3.x)*(p2.y - p1.y) - (p4.y - p3.y)*(p2.x - p1.x));
     
-  print("(", p1.i, ", ", p2.i, ") crossing (", p3.i, ", ", p4.i, ")? parint = ", parametricIntersectionWithSegment, "\n");
+  //print("(", p1.i, ", ", p2.i, ") crossing (", p3.i, ", ", p4.i, ")? parint = ", parametricIntersectionWithSegment, "\n");
   return (parametricIntersectionWithSegment > 0.0 &&
           parametricIntersectionWithSegment < 1.0);      
 }
@@ -333,8 +343,8 @@ void setup()
   basicConnections = new Tri[2*nPts-1];   // oh silt loam
                                           // (nPts-1 will cover basic triangles but
                                           // idk how many are required for rim. not more tho)
-  segs = new Seg[2*nPts+3];               // oh silt loam
-  segsSort = new Seg[2*nPts+3];
+  segs = new Seg[4*nPts+3];               // oh silt loam
+  segsSort = new Seg[4*nPts+3];
   
   for (int i = 0; i < nPts; i++)
   {
@@ -378,45 +388,45 @@ void setup()
   nBasicTris = nTris;
   
   // Draw extra border triangles.  
-  // First, identify all border points.
   Point borderPts[] = new Point[nPts];
   int nBP = 0;
   borderPts[0] = ptsSort[0];
+  Seg lastSeg = borderPts[0].s[0];
+  Seg nextSeg = borderPts[0].s[1];
   
-  for (int i = 1; i < nPts; i++)
+  for (nBP = 1; nBP < nPts; nBP++)
   {    
     // Which other segment joined to this point has only one triangle?
     int nextTraveler = -1;
-    for (int j = 0; j < borderPts[i-1].ns; j++)
+    for (int j = 0; j < borderPts[nBP-1].ns; j++)
     {
-      Seg potentialSeg = borderPts[i-1].s[j];
-      print("--- Segment ", potentialSeg.i, " (", potentialSeg.p[0].i, " -> ", potentialSeg.p[1].i, ") w/ ", potentialSeg.nt, " tris\n");
+      nextSeg = borderPts[nBP-1].s[j];
+      print("--- Segment ", nextSeg.i, " (", nextSeg.p[0].i, " -> ", nextSeg.p[1].i, ") w/ ", nextSeg.nt, " tris\n");
       Point nextPt;
-      if (potentialSeg.p[0] == borderPts[i-1])
+      if (nextSeg.p[0] == borderPts[nBP-1])
       {
-        nextPt = potentialSeg.p[1];
+        nextPt = nextSeg.p[1];
       }
       else
       {
-        nextPt = potentialSeg.p[0];
+        nextPt = nextSeg.p[0];
       }
       
-      if (i > 1 && nextPt == borderPts[i-2])
+      if (nBP > 1 && nextPt == borderPts[nBP-2])
       {
         print("+++ No backtracking!\n");
       }
-      else if (potentialSeg.nt < 2)
+      else if (nextSeg.nt < 2)
       {
-        print("vvv Move on Segment ", potentialSeg.i, "\n");        
-        print("--- Move from point ", borderPts[i-1].i, " to ", nextPt.i, " along Segment ", potentialSeg.i, "\n");
+        print("vvv Move on Segment ", nextSeg.i, "\n");        
+        print("--- Move from point ", borderPts[nBP-1].i, " to ", nextPt.i, " along Segment ", nextSeg.i, "\n");
         nextTraveler = j;
-        borderPts[i] = nextPt;
+        borderPts[nBP] = nextPt;
         break;
       }
     }
-    nBP = i+1;
     
-    if (borderPts[i] == borderPts[0])
+    if (borderPts[nBP] == borderPts[0])
     {
       print("### Returned to start! (border)\n");
       break;
@@ -426,6 +436,70 @@ void setup()
     {
       print("### dude idek what hape (border)\n");
       break;
+    }
+  }
+  
+  int trail = nBP-2;
+  int pivot = nBP-1;
+  int scout = 0;
+  while (scout < nBP)
+  {    
+    if (borderPts[pivot].nt == 1)
+    {
+      print("+++ Point ", borderPts[pivot].i, " is already the apex of a single triangle; must turn the corner\n"); 
+      // Proceed and leave the farthest border point behind.
+      trail = pivot;
+      pivot = scout;
+      scout++;
+      continue;
+    }
+    
+    // Does anything else on the border cross us?
+    boolean cutsThrough = false; 
+    for (int i = 0; i < nSegs; i++)
+    {     
+      if (Intersects(borderPts[trail], borderPts[scout],
+                         segs[i].p[0], segs[i].p[1]) &&
+          Intersects(    segs[i].p[0], segs[i].p[1],
+                     borderPts[trail], borderPts[scout]))
+      {
+        print("+++ Points ", borderPts[trail].i, " and ", borderPts[scout].i, " cut by (", segs[i].p[0].i, " -> ", segs[i].p[1].i, ")\n"); 
+        cutsThrough = true;
+        break;
+      }
+    }
+
+    
+    if (cutsThrough)
+    {
+      // Proceed and leave the farthest border point behind.
+      trail = pivot;
+      pivot = scout;
+      scout++;
+    }
+    else
+    {
+      // Make a new triangle with the two segments.      
+      for (int j = 0; j < borderPts[pivot].ns; j++)
+      {
+        if (borderPts[pivot].s[j].p[0] == borderPts[trail] ||
+            borderPts[pivot].s[j].p[1] == borderPts[trail])
+        {
+          lastSeg = borderPts[pivot].s[j];
+        }
+        else if (borderPts[pivot].s[j].p[0] == borderPts[scout] ||
+                 borderPts[pivot].s[j].p[1] == borderPts[scout])
+        {
+          nextSeg = borderPts[pivot].s[j];
+        }
+      }
+      print(">>> Points ", borderPts[trail].i, " and ", borderPts[scout].i, " can be joined, completing triangle from segments ", lastSeg.i, " and ", nextSeg.i, "\n");
+      
+      AddTriangle(lastSeg, nextSeg);
+      
+      // The point contained by both segments is no longer part of the border.
+      pivot = scout;
+      scout++;
     }
   }
 }
@@ -479,8 +553,8 @@ void draw()
   popMatrix();
     
   pushMatrix();
-    translate(0.0, 0.0, 3.0);
-    for (int i = 0; i < nBasicTris /*+ (frameCount/60) % (nTris-nBasicTris)*/; i++)
+    translate(0.0, 0.0, -3.0);
+    for (int i = 0; i <= nBasicTris + (frameCount/60) % (nTris-nBasicTris); i++)
     {
       /*
       print("Drawing triangle ", basicConnections[i].i, "\n");
@@ -492,13 +566,13 @@ void draw()
       */
       if (i >= nBasicTris)
       {
-        fill(color(255, 255 * float(i)/float(nTris), 0, 170));
+        fill(color(0, 255 * float(i)/float(nTris), 0, 170));
       }
       else
       {
         fill(color(0, 255 * float(i)/float(nTris), 255, 85));
       }
-      stroke(color(85, 255, 170, 170 * float(nPts-i)/float(nTris)));
+      stroke(color(85, 255, 170, 170));
       //translate(0.0, 0.0, (225.0 + 225.0*cos(0.003 * PI * frameCount)) / nTris);
       triangle(
         basicConnections[i].p[0].x * 450, basicConnections[i].p[0].y * 450,
