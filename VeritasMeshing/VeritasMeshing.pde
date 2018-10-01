@@ -540,7 +540,7 @@ void draw()
   translate(0.0, 0.0, -450.0);
   rotateY(0.2 * PI * sin(0.7 * PI * tEaseOut));
   rotateX(0.1 * PI * tEaseOut);
-  scale(1);
+  scale(1 + 0.5 * tEaseOut);
   
   textSize(24);
   textAlign(CENTER, CENTER);
@@ -549,9 +549,9 @@ void draw()
   //box(750.0 * 1.2, 450.0 * 1.2, 1.0);
   //box(450.0 * 1.2, 750.0 * 1.2, 0.9);
   
-  stroke(cs);
+  stroke(color(170, 85, 255, 170 * (1.0-tEaseOut)));
   pushMatrix();
-    translate(0.0, 0.0, 1.0);
+    translate(0.0, 0.0, 1.0 - 300 * tEaseOut);
     float tsz = 12 + 3*cos(0.01 * PI * frameCount);
     for (int i = 0; i < nPts; i++)
     {
@@ -566,14 +566,14 @@ void draw()
          0.0,        sqrt(3)/3*tsz
         );
       popMatrix();
-      fill(color(255, 255 * float(i)/float(nPts), 255, 255));
+      fill(color(255, 255 * float(i)/float(nPts), 255, 255 * (1.0-tEaseOut)));
       text(ptsSort[i].i, 0.0, -2*tsz, 0.1);
       popMatrix();
     }
   popMatrix();
     
   pushMatrix();
-    translate(0.0, 0.0, 3.0 - 600 * tEaseOut);
+    translate(0.0, 0.0, 3.0 - 300 * tEaseOut);
     for (int i = 0; i < min(frameCount % (propShattering*nTris), nTris); i++)
     {
       /*
@@ -587,7 +587,7 @@ void draw()
       float tIndex = 1000 * ((i*tEaseIn) % 0.001); 
       float tAlpha = 20 * (1.0 - tEaseIn) -
                      15 * tIndex +
-                     0.2 * sin(0.002 * PI * frameCount);
+                     0.2 * sin(0.0002 * PI * frameCount);
       tAlpha = (tAlpha > 1.0) ? 1.0 : (tAlpha < 0.0) ? 0.0 : tAlpha;
       
   
@@ -618,6 +618,6 @@ void draw()
   
   if (frameCount < propShattering*nTris)
   {
-    saveFrame("test-####.png");
+    saveFrame("frames/test-####.png");
   }
 }
