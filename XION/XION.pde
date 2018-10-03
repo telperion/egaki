@@ -3,6 +3,20 @@ float b = s*2;
 float a = s*2*(1 - sqrt(0.5));
 
 
+
+float clasp(float t, float t0, float t1)
+{
+  if (t1 > t0)
+  {
+    return t < t0 ? 0 : t > t1 ? 1 : (t - t0)/(t1 - t0);
+  }  
+  else
+  {
+    float swap = t0; t0 = t1; t1 = swap;
+    return 1 - (t < t0 ? 0 : t > t1 ? 1 : (t - t0)/(t1 - t0));
+  }
+}
+
 class Point
 {
   float x;
@@ -64,11 +78,31 @@ class Tri
         (p[0].y + p[1].y + p[2].y) / 3,
         (p[0].z + p[1].z + p[2].z) / 3
       );
+      Point v1 = new Point(
+        (p[1].x - p[0].x), 
+        (p[1].y - p[0].y), 
+        (p[1].z - p[0].z) 
+      );
+      Point v2 = new Point(
+        (p[2].x - p[0].x), 
+        (p[2].y - p[0].y), 
+        (p[2].z - p[0].z) 
+      );
+      Point n = new Point(
+        (v1.y*v2.z - v1.z*v2.y),
+        (v1.z*v2.x - v1.x*v2.z),
+        (v1.x*v2.y - v1.y*v2.x)
+      );
       
-      float r = sqrt(q.x*q.x + q.y*q.y + q.z*q.z);
-      float l = sqrt(q.x*q.x + q.z*q.z);
-      float phi = asin(q.y / r);
-      float theta = asin(q.x / (r * cos(phi)));
+      if (frameCount <= 1)
+      {
+        print("center: (", q.x, ", ", q.y, ", ", q.z, ")\n");
+        print("normal: (", n.x, ", ", n.y, ", ", n.z, ")\n");
+      }
+      
+      float l = sqrt(n.x*n.x + n.z*n.z);
+      float phi = atan2(n.y, l);
+      float theta = atan2(n.x, n.z);
       
       if (frameCount <= 1)
       {
@@ -78,22 +112,48 @@ class Tri
       
       for (int i = 0; i < 3; i++)
       {
+        p[i].x -= q.x;
+        p[i].y -= q.y;
+        p[i].z -= q.z;
+        
+        
         if (frameCount <= 1)
         {
           print("(", p[i].x, ", ", p[i].y, ", ", p[i].z, ")\n");
         }
         p[i].RotateY(-theta);
-        p[i].RotateZ(-phi);
+        if (frameCount <= 1)
+        {
+          print("(", p[i].x, ", ", p[i].y, ", ", p[i].z, ")\n");
+        }
+        p[i].RotateX(phi);
         if (frameCount <= 1)
         {
           print("(", p[i].x, ", ", p[i].y, ", ", p[i].z, ")\n");
         }
       }
       
+      
+        if (frameCount <= 1)
+        {
+          print("n (", n.x, ", ", n.y, ", ", n.z, ")\n");
+        }
+        n.RotateY(-theta);
+        if (frameCount <= 1)
+        {
+          print("n (", n.x, ", ", n.y, ", ", n.z, ")\n");
+        }
+        n.RotateX(phi);
+        if (frameCount <= 1)
+        {
+          print("n (", n.x, ", ", n.y, ", ", n.z, ")\n");
+        }
+        
+      
       pushMatrix();
-        translate(0, 0, r);
-        rotateZ(phi);
+        translate(q.x, q.y, q.z);
         rotateY(theta);
+        rotateX(-phi);
         
         triangle(
           p[0].x, p[0].y,
@@ -156,9 +216,9 @@ void DrawTest()
     if (i % 4 == 0) {f2 *= -1;}
     
     Tri t = new Tri();
-    t.p[0] = new Point(s*f2*0.2, s*f1*0.2, s*f0);
-    t.p[1] = new Point(s*f2*0.2, s*f1, s*f0*0.2);
-    t.p[2] = new Point(s*f2, s*f1*0.2, s*f0*0.2);
+    t.p[0] = new Point(s*f2*0.1, s*f1*0.1, s*f0);
+    t.p[1] = new Point(s*f2*0.1, s*f1, s*f0*0.1);
+    t.p[2] = new Point(s*f2, s*f1*0.1, s*f0*0.1);
     t.Draw();
   }
 }
@@ -181,7 +241,7 @@ void draw()
   pushMatrix();
     translate(0, 0, -30);
     scale(2);
-    rotateY(0.01 * PI * frameCount);
+    rotateY(0.001 * PI * frameCount);
     rotateX(0.1 * PI);
     
     //box(20, 50, 100);
@@ -189,4 +249,9 @@ void draw()
     DrawXI();
     DrawTest();
   popMatrix();
+  
+  if (frameCount % 10 == 0)
+  {
+    saveFrame("frames/####.png");
+  }
 }
