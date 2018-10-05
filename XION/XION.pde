@@ -1,10 +1,16 @@
 float s = 100;
 float b = s*2;
 float a = s*2*(1 - sqrt(0.5));    
-float m = (s-a/2)/s;
+float m = a*(s-a/2)/s;
 
 Point XIPts[];
 Tri   XITri[];
+Point IOPts[];
+Tri   IOTri[];
+Point ONPts[];
+Tri   ONTri[];
+Point NXPts[];
+Tri   NXTri[];
 
 float clasp(float t, float t0, float t1)
 {
@@ -206,62 +212,62 @@ void SetupXI()
     XIPts[p++] = new Point(-s,   -s,   -s);          // 15
     
     // fwd top rite bar end
-    XIPts[p++] = new Point( s-a*m,    s-a,  s);      // 16
-    XIPts[p++] = new Point( s-a*m-a,  s-a,  s);      // 17
+    XIPts[p++] = new Point( s-m,    s-a,  s);      // 16
+    XIPts[p++] = new Point( s-m-a,  s-a,  s);      // 17
     // fwd top left bar end
-    XIPts[p++] = new Point(-s+a*m,    s-a,  s);      // 18
-    XIPts[p++] = new Point(-s+a*m+a,  s-a,  s);      // 19
+    XIPts[p++] = new Point(-s+m,    s-a,  s);      // 18
+    XIPts[p++] = new Point(-s+m+a,  s-a,  s);      // 19
     // fwd btm rite bar end
-    XIPts[p++] = new Point( s-a*m,   -s+a,  s);      // 20
-    XIPts[p++] = new Point( s-a*m-a, -s+a,  s);      // 21
+    XIPts[p++] = new Point( s-m,   -s+a,  s);      // 20
+    XIPts[p++] = new Point( s-m-a, -s+a,  s);      // 21
     // fwd btm left bar end
-    XIPts[p++] = new Point(-s+a*m,   -s+a,  s);      // 22
-    XIPts[p++] = new Point(-s+a*m+a, -s+a,  s);      // 23
+    XIPts[p++] = new Point(-s+m,   -s+a,  s);      // 22
+    XIPts[p++] = new Point(-s+m+a, -s+a,  s);      // 23
     // aft top rite bar end
-    XIPts[p++] = new Point( s-a*m,    s-a, -s);      // 24
-    XIPts[p++] = new Point( s-a*m-a,  s-a, -s);      // 25
+    XIPts[p++] = new Point( s-m,    s-a, -s);      // 24
+    XIPts[p++] = new Point( s-m-a,  s-a, -s);      // 25
     // aft top left bar end
-    XIPts[p++] = new Point(-s+a*m,    s-a, -s);      // 26
-    XIPts[p++] = new Point(-s+a*m+a,  s-a, -s);      // 27
+    XIPts[p++] = new Point(-s+m,    s-a, -s);      // 26
+    XIPts[p++] = new Point(-s+m+a,  s-a, -s);      // 27
     // aft btm rite bar end
-    XIPts[p++] = new Point( s-a*m,   -s+a, -s);      // 28
-    XIPts[p++] = new Point( s-a*m-a, -s+a, -s);      // 29
+    XIPts[p++] = new Point( s-m,   -s+a, -s);      // 28
+    XIPts[p++] = new Point( s-m-a, -s+a, -s);      // 29
     // aft btm left bar end
-    XIPts[p++] = new Point(-s+a*m,   -s+a, -s);      // 30
-    XIPts[p++] = new Point(-s+a*m+a, -s+a, -s);      // 31
+    XIPts[p++] = new Point(-s+m,   -s+a, -s);      // 30
+    XIPts[p++] = new Point(-s+m+a, -s+a, -s);      // 31
     
     // fwd top rite stem inset
-    XIPts[p++] = new Point( s-a*m,    s-a,  a/2);    // 32
-    XIPts[p++] = new Point( s-a*m-a,  s-a,  a/2);    // 33
+    XIPts[p++] = new Point( s-m,    s-a,  a/2);    // 32
+    XIPts[p++] = new Point( s-m-a,  s-a,  a/2);    // 33
     // fwd top left stem inset
-    XIPts[p++] = new Point(-s+a*m,    s-a,  a/2);    // 34
-    XIPts[p++] = new Point(-s+a*m+a,  s-a,  a/2);    // 35
+    XIPts[p++] = new Point(-s+m,    s-a,  a/2);    // 34
+    XIPts[p++] = new Point(-s+m+a,  s-a,  a/2);    // 35
     // fwd btm rite stem inset
-    XIPts[p++] = new Point( s-a*m,   -s+a,  a/2);    // 36
-    XIPts[p++] = new Point( s-a*m-a, -s+a,  a/2);    // 37
+    XIPts[p++] = new Point( s-m,   -s+a,  a/2);    // 36
+    XIPts[p++] = new Point( s-m-a, -s+a,  a/2);    // 37
     // fwd btm left stem inset
-    XIPts[p++] = new Point(-s+a*m,   -s+a,  a/2);    // 38
-    XIPts[p++] = new Point(-s+a*m+a, -s+a,  a/2);    // 39
+    XIPts[p++] = new Point(-s+m,   -s+a,  a/2);    // 38
+    XIPts[p++] = new Point(-s+m+a, -s+a,  a/2);    // 39
     // aft top rite stem inset
-    XIPts[p++] = new Point( s-a*m,    s-a, -a/2);    // 40
-    XIPts[p++] = new Point( s-a*m-a,  s-a, -a/2);    // 41
+    XIPts[p++] = new Point( s-m,    s-a, -a/2);    // 40
+    XIPts[p++] = new Point( s-m-a,  s-a, -a/2);    // 41
     // aft top left stem inset
-    XIPts[p++] = new Point(-s+a*m,    s-a, -a/2);    // 42
-    XIPts[p++] = new Point(-s+a*m+a,  s-a, -a/2);    // 43
+    XIPts[p++] = new Point(-s+m,    s-a, -a/2);    // 42
+    XIPts[p++] = new Point(-s+m+a,  s-a, -a/2);    // 43
     // aft btm rite stem inset
-    XIPts[p++] = new Point( s-a*m,   -s+a, -a/2);    // 44
-    XIPts[p++] = new Point( s-a*m-a, -s+a, -a/2);    // 45
+    XIPts[p++] = new Point( s-m,   -s+a, -a/2);    // 44
+    XIPts[p++] = new Point( s-m-a, -s+a, -a/2);    // 45
     // aft btm left stem inset
-    XIPts[p++] = new Point(-s+a*m,   -s+a, -a/2);    // 46
-    XIPts[p++] = new Point(-s+a*m+a, -s+a, -a/2);    // 47
+    XIPts[p++] = new Point(-s+m,   -s+a, -a/2);    // 46
+    XIPts[p++] = new Point(-s+m+a, -s+a, -a/2);    // 47
     
     
     // top left crossbar unjoin
-    XIPts[p++] = new Point(-s+2*a*m,  s-2*a,  a/2);  // 48
-    XIPts[p++] = new Point(-s+2*a*m,  s-2*a, -a/2);  // 49
+    XIPts[p++] = new Point(-s+2*m,  s-2*a,  a/2);  // 48
+    XIPts[p++] = new Point(-s+2*m,  s-2*a, -a/2);  // 49
     // btm rite crossbar unjoin
-    XIPts[p++] = new Point( s-2*a*m, -s+2*a,  a/2);  // 50
-    XIPts[p++] = new Point( s-2*a*m, -s+2*a, -a/2);  // 51
+    XIPts[p++] = new Point( s-2*m, -s+2*a,  a/2);  // 50
+    XIPts[p++] = new Point( s-2*m, -s+2*a, -a/2);  // 51
     
     
     
@@ -410,11 +416,267 @@ void DrawXI()
 }
 
 
+void SetupIO()
+{
+  
+  if (IOPts == null || IOTri == null)
+  {
+    IOPts = new Point[60];
+    
+    int p = 0;
+    
+    // top flat
+    IOPts[p++] = new Point( s,  s,  a/2);          // 00
+    IOPts[p++] = new Point( s,  s, -a/2);          // 01
+    IOPts[p++] = new Point(-s,  s, -a/2);          // 02
+    IOPts[p++] = new Point(-s,  s,  a/2);          // 03
+    // btm flat
+    IOPts[p++] = new Point( s, -s,  a/2);          // 04
+    IOPts[p++] = new Point( s, -s, -a/2);          // 05
+    IOPts[p++] = new Point(-s, -s, -a/2);          // 06
+    IOPts[p++] = new Point(-s, -s,  a/2);          // 07
+    
+    // top bar end
+    IOPts[p++] = new Point( s,  s-a,  a/2+m);      // 08
+    IOPts[p++] = new Point( s,  s-a, -a/2-m);      // 09
+    IOPts[p++] = new Point(-s,  s-a, -a/2-m);      // 10
+    IOPts[p++] = new Point(-s,  s-a,  a/2+m);      // 11
+    // btm bar end
+    IOPts[p++] = new Point( s, -s+a,  a/2+m);      // 12
+    IOPts[p++] = new Point( s, -s+a, -a/2-m);      // 13
+    IOPts[p++] = new Point(-s, -s+a, -a/2-m);      // 14
+    IOPts[p++] = new Point(-s, -s+a,  a/2+m);      // 15
+        
+    // top inset outers
+    IOPts[p++] = new Point( a/2,  s-a,  a/2+m);    // 16
+    IOPts[p++] = new Point( a/2,  s-a, -a/2-m);    // 17
+    IOPts[p++] = new Point(-a/2,  s-a, -a/2-m);    // 18
+    IOPts[p++] = new Point(-a/2,  s-a,  a/2+m);    // 19
+    // btm inset outers
+    IOPts[p++] = new Point( a/2, -s+a,  a/2+m);    // 20
+    IOPts[p++] = new Point( a/2, -s+a, -a/2-m);    // 21
+    IOPts[p++] = new Point(-a/2, -s+a, -a/2-m);    // 22
+    IOPts[p++] = new Point(-a/2, -s+a,  a/2+m);    // 23    
+    
+    // fwd elbow
+    IOPts[p++] = new Point( a/2,  0,  s);          // 24
+    IOPts[p++] = new Point(-a/2,  0,  s);          // 25
+    IOPts[p++] = new Point(-a/2,  0,  s-a);        // 26
+    IOPts[p++] = new Point( a/2,  0,  s-a);        // 27
+    // aft elbow
+    IOPts[p++] = new Point( a/2,  0, -s);          // 28
+    IOPts[p++] = new Point(-a/2,  0, -s);          // 29
+    IOPts[p++] = new Point(-a/2,  0, -s+a);        // 30
+    IOPts[p++] = new Point( a/2,  0, -s+a);        // 31    
+    
+    // top inset center
+    IOPts[p++] = new Point( a/2,  s-a, 0);         // 32
+    IOPts[p++] = new Point(-a/2,  s-a, 0);         // 33    
+    // btm inset center
+    IOPts[p++] = new Point( a/2, -s+a, 0);         // 34
+    IOPts[p++] = new Point(-a/2, -s+a, 0);         // 35
+    
+    
+    
+    
+    
+    
+    IOTri = new Tri[100];
+    
+    int i = 0;        
+        
+    // top flat
+    IOTri[i++] = new Tri(IOPts[ 0], IOPts[ 1], IOPts[ 2]);
+    IOTri[i++] = new Tri(IOPts[ 0], IOPts[ 2], IOPts[ 3]);
+    // btm flat
+    IOTri[i++] = new Tri(IOPts[ 4], IOPts[ 5], IOPts[ 6]);
+    IOTri[i++] = new Tri(IOPts[ 4], IOPts[ 6], IOPts[ 7]);
+    
+    // top rite bar end
+    IOTri[i++] = new Tri(IOPts[ 0], IOPts[ 1], IOPts[ 8]);
+    IOTri[i++] = new Tri(IOPts[ 1], IOPts[ 8], IOPts[ 9]);
+    // top left bar end
+    IOTri[i++] = new Tri(IOPts[ 2], IOPts[ 3], IOPts[10]);
+    IOTri[i++] = new Tri(IOPts[ 3], IOPts[10], IOPts[11]);
+    // btm rite bar end
+    IOTri[i++] = new Tri(IOPts[ 4], IOPts[ 5], IOPts[12]);
+    IOTri[i++] = new Tri(IOPts[ 5], IOPts[12], IOPts[13]);
+    // btm left bar end
+    IOTri[i++] = new Tri(IOPts[ 6], IOPts[ 7], IOPts[14]);
+    IOTri[i++] = new Tri(IOPts[ 7], IOPts[14], IOPts[15]);
+    
+    // fwd top bar
+    IOTri[i++] = new Tri(IOPts[ 0], IOPts[ 3], IOPts[ 8]);
+    IOTri[i++] = new Tri(IOPts[ 3], IOPts[ 8], IOPts[11]);
+    // aft top bar
+    IOTri[i++] = new Tri(IOPts[ 1], IOPts[ 2], IOPts[ 9]);
+    IOTri[i++] = new Tri(IOPts[ 2], IOPts[ 9], IOPts[10]);
+    // fwd btm bar
+    IOTri[i++] = new Tri(IOPts[ 4], IOPts[ 7], IOPts[12]);
+    IOTri[i++] = new Tri(IOPts[ 7], IOPts[12], IOPts[15]);
+    // aft btm bar
+    IOTri[i++] = new Tri(IOPts[ 5], IOPts[ 6], IOPts[13]);
+    IOTri[i++] = new Tri(IOPts[ 6], IOPts[13], IOPts[14]);
+    
+    // rite top bar unders
+    IOTri[i++] = new Tri(IOPts[ 8], IOPts[ 9], IOPts[16]);
+    IOTri[i++] = new Tri(IOPts[ 9], IOPts[16], IOPts[17]);
+    // left top bar unders
+    IOTri[i++] = new Tri(IOPts[10], IOPts[11], IOPts[18]);
+    IOTri[i++] = new Tri(IOPts[11], IOPts[18], IOPts[19]);
+    // rite btm bar unders
+    IOTri[i++] = new Tri(IOPts[12], IOPts[13], IOPts[20]);
+    IOTri[i++] = new Tri(IOPts[13], IOPts[20], IOPts[21]);
+    // left btm bar unders
+    IOTri[i++] = new Tri(IOPts[14], IOPts[15], IOPts[22]);
+    IOTri[i++] = new Tri(IOPts[15], IOPts[22], IOPts[23]);
+        
+    // fwd rite top elbow
+    IOTri[i++] = new Tri(IOPts[16], IOPts[32], IOPts[27]);
+    IOTri[i++] = new Tri(IOPts[16], IOPts[27], IOPts[24]);
+    // aft rite top elbow
+    IOTri[i++] = new Tri(IOPts[17], IOPts[32], IOPts[31]);
+    IOTri[i++] = new Tri(IOPts[17], IOPts[31], IOPts[28]);
+    // fwd left top elbow
+    IOTri[i++] = new Tri(IOPts[19], IOPts[33], IOPts[25]);
+    IOTri[i++] = new Tri(IOPts[33], IOPts[25], IOPts[26]);
+    // aft left top elbow
+    IOTri[i++] = new Tri(IOPts[18], IOPts[33], IOPts[29]);
+    IOTri[i++] = new Tri(IOPts[33], IOPts[29], IOPts[30]);
+    // fwd rite btm elbow
+    IOTri[i++] = new Tri(IOPts[20], IOPts[34], IOPts[27]);
+    IOTri[i++] = new Tri(IOPts[20], IOPts[27], IOPts[24]);
+    // aft rite btm elbow
+    IOTri[i++] = new Tri(IOPts[21], IOPts[34], IOPts[31]);
+    IOTri[i++] = new Tri(IOPts[21], IOPts[31], IOPts[28]);
+    // fwd left btm elbow
+    IOTri[i++] = new Tri(IOPts[23], IOPts[35], IOPts[25]);
+    IOTri[i++] = new Tri(IOPts[35], IOPts[25], IOPts[26]);
+    // aft left btm elbow
+    IOTri[i++] = new Tri(IOPts[22], IOPts[35], IOPts[29]);
+    IOTri[i++] = new Tri(IOPts[35], IOPts[29], IOPts[30]);
+    
+    // fwd top outer elbow
+    IOTri[i++] = new Tri(IOPts[16], IOPts[19], IOPts[24]);
+    IOTri[i++] = new Tri(IOPts[19], IOPts[24], IOPts[25]);
+    // aft top outer elbow    
+    IOTri[i++] = new Tri(IOPts[17], IOPts[18], IOPts[28]);
+    IOTri[i++] = new Tri(IOPts[18], IOPts[28], IOPts[29]);
+    // fwd btm outer elbow
+    IOTri[i++] = new Tri(IOPts[20], IOPts[23], IOPts[24]);
+    IOTri[i++] = new Tri(IOPts[23], IOPts[24], IOPts[25]);
+    // aft btm outer elbow
+    IOTri[i++] = new Tri(IOPts[21], IOPts[22], IOPts[28]);
+    IOTri[i++] = new Tri(IOPts[22], IOPts[28], IOPts[29]);
+    // fwd top inner elbow
+    IOTri[i++] = new Tri(IOPts[32], IOPts[33], IOPts[26]);
+    IOTri[i++] = new Tri(IOPts[32], IOPts[26], IOPts[27]);
+    // aft top inner elbow    
+    IOTri[i++] = new Tri(IOPts[32], IOPts[33], IOPts[30]);
+    IOTri[i++] = new Tri(IOPts[32], IOPts[30], IOPts[31]);
+    // fwd btm inner elbow
+    IOTri[i++] = new Tri(IOPts[34], IOPts[35], IOPts[26]);
+    IOTri[i++] = new Tri(IOPts[34], IOPts[26], IOPts[27]);
+    // aft btm inner elbow
+    IOTri[i++] = new Tri(IOPts[34], IOPts[35], IOPts[30]);
+    IOTri[i++] = new Tri(IOPts[34], IOPts[30], IOPts[31]);
+  }
+}
+
+void DrawIO()
+{  
+  for (int i = 0; i < 60; i++)
+  {
+    if (IOTri[i] != null)
+    {
+      IOTri[i].Draw();
+    }
+  }
+}
+
+
+void SetupON()
+{
+  
+  if (ONPts == null || ONTri == null)
+  {
+    ONPts = new Point[60];
+    
+    int p = 0;
+    
+    // top rite flat
+    ONPts[p++] = new Point( s,    s,    s);          // 00 
+    ONPts[p++] = new Point( s,    s,    s);          // 00 
+    ONPts[p++] = new Point( s,    s,    s);          // 00 
+    
+    
+    ONTri = new Tri[100];
+    
+    int i = 0;        
+    
+    // top rite flat
+    ONTri[i++] = new Tri(ONPts[ 0], ONPts[ 1], ONPts[ 2]);
+  }
+}
+
+void DrawON()
+{  
+  for (int i = 0; i < 76; i++)
+  {
+    if (ONTri[i] != null)
+    {
+      ONTri[i].Draw();
+    }
+  }
+}
+
+
+
+void SetupNX()
+{
+  
+  if (NXPts == null || NXTri == null)
+  {
+    NXPts = new Point[60];
+    
+    int p = 0;
+    
+    // top rite flat
+    NXPts[p++] = new Point( s,    s,    s);          // 00 
+    NXPts[p++] = new Point( s,    s,    s);          // 00 
+    NXPts[p++] = new Point( s,    s,    s);          // 00 
+    
+    
+    NXTri = new Tri[100];
+    
+    int i = 0;        
+    
+    // top rite flat
+    NXTri[i++] = new Tri(NXPts[ 0], NXPts[ 1], NXPts[ 2]);
+  }
+}
+
+void DrawNX()
+{  
+  for (int i = 0; i < 0; i++)
+  {
+    if (NXTri[i] != null)
+    {
+      NXTri[i].Draw();
+    }
+  }
+}
+
+
+
 void setup()
 {  
   size(720, 720, P3D);
   
   SetupXI();
+  SetupIO();
+  SetupON();
+  SetupNX();
 }
 
 void draw()
@@ -434,7 +696,8 @@ void draw()
     
     //box(20, 50, 100);
     
-    DrawXI();
+    //DrawXI();
+    DrawIO();
     //DrawTest();
   popMatrix();
   
