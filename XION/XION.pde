@@ -2,6 +2,8 @@ float s = 100;
 float b = s*2;
 float a = s*2*(1 - sqrt(0.5));    
 float m = a*(s-a/2)/s;
+float h = s*2*(s-a)/(s-a/2);
+float w = (s-a)*(h-s)/s;
 
 Point XIPts[];
 Tri   XITri[];
@@ -475,11 +477,7 @@ void SetupIO()
     // btm inset center
     IOPts[p++] = new Point( a/2, -s+a, 0);         // 34
     IOPts[p++] = new Point(-a/2, -s+a, 0);         // 35
-    
-    
-    
-    
-    
+             
     
     IOTri = new Tri[100];
     
@@ -600,14 +598,89 @@ void SetupON()
   
   if (ONPts == null || ONTri == null)
   {
-    ONPts = new Point[60];
+    ONPts = new Point[56];
     
     int p = 0;
+        
+    // top fwd flat
+    ONPts[p++] = new Point(-a,  s,  s);          // 00
+    ONPts[p++] = new Point(-a,  s,  s-a);        // 00
+    ONPts[p++] = new Point( a,  s,  s-a);        // 00
+    ONPts[p++] = new Point( a,  s,  s);          // 00
+    // top aft flat
+    ONPts[p++] = new Point(-a,  s, -s);          // 00
+    ONPts[p++] = new Point(-a,  s, -s+a);        // 00
+    ONPts[p++] = new Point( a,  s, -s+a);        // 00
+    ONPts[p++] = new Point( a,  s, -s);          // 00
+    // btm fwd flat
+    ONPts[p++] = new Point(-a, -s,  s);          // 00
+    ONPts[p++] = new Point(-a, -s,  s-a);        // 00
+    ONPts[p++] = new Point( a, -s,  s-a);        // 00
+    ONPts[p++] = new Point( a, -s,  s);          // 00
+    // btm aft flat
+    ONPts[p++] = new Point(-a, -s, -s);          // 00
+    ONPts[p++] = new Point(-a, -s, -s+a);        // 00
+    ONPts[p++] = new Point( a, -s, -s+a);        // 00
+    ONPts[p++] = new Point( a, -s, -s);          // 00
     
-    // top rite flat
-    ONPts[p++] = new Point( s,    s,    s);          // 00 
-    ONPts[p++] = new Point( s,    s,    s);          // 00 
-    ONPts[p++] = new Point( s,    s,    s);          // 00 
+    // rite outer O-elbows
+    ONPts[p++] = new Point( s,  0,  s);          // 00
+    ONPts[p++] = new Point( s,  0,  s-a);        // 00
+    ONPts[p++] = new Point( s,  0, -s+a);        // 00
+    ONPts[p++] = new Point( s,  0, -s);          // 00
+    // left outer O-elbows
+    ONPts[p++] = new Point(-s,  0,  s);          // 00
+    ONPts[p++] = new Point(-s,  0,  s-a);        // 00
+    ONPts[p++] = new Point(-s,  0, -s+a);        // 00
+    ONPts[p++] = new Point(-s,  0, -s);          // 00
+    // rite inner O-elbows
+    ONPts[p++] = new Point( s-a,  0,  s);        // 00
+    ONPts[p++] = new Point( s-a,  0,  s-a);      // 00
+    ONPts[p++] = new Point( s-a,  0, -s+a);      // 00
+    ONPts[p++] = new Point( s-a,  0, -s);        // 00
+    // left inner O-elbows
+    ONPts[p++] = new Point(-s+a,  0,  s);        // 00
+    ONPts[p++] = new Point(-s+a,  0,  s-a);      // 00
+    ONPts[p++] = new Point(-s+a,  0, -s+a);      // 00
+    ONPts[p++] = new Point(-s+a,  0, -s);        // 00
+    
+    // rite outer N-crossbend
+    ONPts[p++] = new Point( s-w,  h-s,  s-a);    // 00
+    ONPts[p++] = new Point( s-w, -h+s, -s+a);    // 00
+    // left outer N-crossbend
+    ONPts[p++] = new Point(-s+w,  h-s,  s-a);    // 00
+    ONPts[p++] = new Point(-s+w, -h+s, -s+a);    // 00
+    // rite inner N-crossbend
+    ONPts[p++] = new Point( s-w-a,  h-s,  s-a);  // 00
+    ONPts[p++] = new Point( s-w-a, -h+s, -s+a);  // 00
+    // left inner N-crossbend
+    ONPts[p++] = new Point(-s+w+a,  h-s,  s-a);  // 00
+    ONPts[p++] = new Point(-s+w+a, -h+s, -s+a);  // 00
+    
+    // rite N-elbows
+    ONPts[p++] = new Point( s,    0,  s-a);      // 00
+    ONPts[p++] = new Point( s-a,  0,  s-a);      // 00
+    ONPts[p++] = new Point( s-a,  0, -s+a);      // 00
+    ONPts[p++] = new Point( s,    0, -s+a);      // 00
+    // left N-elbows
+    ONPts[p++] = new Point(-s,    0,  s-a);      // 00
+    ONPts[p++] = new Point(-s+a,  0,  s-a);      // 00
+    ONPts[p++] = new Point(-s+a,  0, -s+a);      // 00
+    ONPts[p++] = new Point(-s,    0, -s+a);      // 00
+    
+    // top fwd O-point
+    ONPts[p++] = new Point(0,  s-a,  s);         // 00
+    ONPts[p++] = new Point(0,  s-a,  s-a);       // 00
+    // top aft O-point
+    ONPts[p++] = new Point(0,  s-a, -s);         // 00
+    ONPts[p++] = new Point(0,  s-a, -s+a);       // 00
+    // btm fwd O-point
+    ONPts[p++] = new Point(0, -s+a,  s);         // 00
+    ONPts[p++] = new Point(0, -s+a,  s-a);       // 00
+    // btm aft O-point
+    ONPts[p++] = new Point(0, -s+a, -s);         // 00
+    ONPts[p++] = new Point(0, -s+a, -s+a);       // 00
+    
     
     
     ONTri = new Tri[100];
@@ -621,11 +694,19 @@ void SetupON()
 
 void DrawON()
 {  
-  for (int i = 0; i < 76; i++)
+  for (int i = 0; i < 56; i++)
   {
-    if (ONTri[i] != null)
+    if (ONPts[i] != null)
     {
-      ONTri[i].Draw();
+      pushMatrix();
+      translate(ONPts[i].x, ONPts[i].y, ONPts[i].z);
+      rotateY(-0.001 * PI * frameCount);
+            
+      fill(color(170, 255, 255, 170));
+      text(i, 0.0, 0.0, 0.0);
+      popMatrix();
+      
+      //ONTri[i].Draw();
     }
   }
 }
@@ -673,6 +754,9 @@ void setup()
 {  
   size(720, 720, P3D);
   
+  textSize(12);
+  textAlign(CENTER, CENTER);
+  
   SetupXI();
   SetupIO();
   SetupON();
@@ -697,7 +781,9 @@ void draw()
     //box(20, 50, 100);
     
     //DrawXI();
-    DrawIO();
+    //DrawIO();
+    DrawON();
+    //DrawNX();
     //DrawTest();
   popMatrix();
   
