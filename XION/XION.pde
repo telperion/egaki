@@ -1,10 +1,10 @@
-float s = 180;
+float s = 150;
 float b = s*2;
 float a = s*0.4;//2*(1 - sqrt(0.5));
 float crossRatio = (s-a/2)/s;
 float m = a*crossRatio;
 float h = s*2*(s-a)/(s-a/2);
-float w = (s-a)*(h-s)/s;
+float w = (s-a/2)*(h-s)/s;
 float nx1 = (2*s-h)*crossRatio;
 float on1 = (s-a)*crossRatio;
 
@@ -12,7 +12,7 @@ float xrot = 0;
 float yrot = 0;
 float tween = 0;
 
-int whichShape = 2;
+int whichShape = 0;
 
 Point XIPts[];
 Tri   XITri[];
@@ -22,6 +22,8 @@ Point ONPts[];
 Tri   ONTri[];
 Point NXPts[];
 Tri   NXTri[];
+
+PShader pixShader;
 
 float clasp(float t, float t0, float t1)
 {
@@ -86,9 +88,11 @@ class Point
 class Tri
 {
   Point p[];
+  boolean rev;
   Tri()
   {
     p = new Point[3];
+    rev = false;
   }
   Tri(Point p0, Point p1, Point p2)
   {
@@ -96,6 +100,15 @@ class Tri
     p[0] = p0;
     p[1] = p1;
     p[2] = p2;
+    rev = false;
+  }
+  Tri(Point p0, Point p1, Point p2, boolean rr)
+  {
+    p = new Point[6];
+    p[0] = p0;
+    p[1] = p1;
+    p[2] = p2;
+    rev = rr;
   }
   void Draw()
   {
@@ -164,11 +177,22 @@ class Tri
         rotateY(theta);
         rotateX(-phi);
         
-        triangle(
-          p[3].x, p[3].y,
-          p[4].x, p[4].y,
-          p[5].x, p[5].y
-          );        
+        if (!rev)
+        {
+          triangle(
+            p[3].x, p[3].y,
+            p[4].x, p[4].y,
+            p[5].x, p[5].y
+            );        
+        }
+        else
+        {
+          triangle(
+            p[3].x, p[3].y,
+            p[5].x, p[5].y,
+            p[4].x, p[4].y
+            ); 
+        }
       popMatrix();
     }
   }
@@ -197,7 +221,7 @@ void SetupXI()
 {  
   if (XIPts == null || XITri == null)
   {
-    XIPts = new Point[60];
+    XIPts = new Point[100];
     
     int p = 0;
     
@@ -288,69 +312,69 @@ void SetupXI()
         
     
     // top rite flat
-    XITri[i++] = new Tri(XIPts[ 0], XIPts[ 1], XIPts[ 2]);
-    XITri[i++] = new Tri(XIPts[ 0], XIPts[ 2], XIPts[ 3]);
+    XITri[i++] = new Tri(XIPts[ 0], XIPts[ 1], XIPts[ 2], false);
+    XITri[i++] = new Tri(XIPts[ 0], XIPts[ 2], XIPts[ 3], false);
     // top left flat
-    XITri[i++] = new Tri(XIPts[ 4], XIPts[ 5], XIPts[ 6]);
-    XITri[i++] = new Tri(XIPts[ 4], XIPts[ 6], XIPts[ 7]);
+    XITri[i++] = new Tri(XIPts[ 4], XIPts[ 5], XIPts[ 6], false);
+    XITri[i++] = new Tri(XIPts[ 4], XIPts[ 6], XIPts[ 7], false);
     // btm rite flat
-    XITri[i++] = new Tri(XIPts[ 8], XIPts[ 9], XIPts[10]);
-    XITri[i++] = new Tri(XIPts[ 8], XIPts[10], XIPts[11]);
+    XITri[i++] = new Tri(XIPts[ 8], XIPts[ 9], XIPts[10], false);
+    XITri[i++] = new Tri(XIPts[ 8], XIPts[10], XIPts[11], false);
     // btm left flat
-    XITri[i++] = new Tri(XIPts[12], XIPts[13], XIPts[14]);
-    XITri[i++] = new Tri(XIPts[12], XIPts[14], XIPts[15]);
+    XITri[i++] = new Tri(XIPts[12], XIPts[13], XIPts[14], false);
+    XITri[i++] = new Tri(XIPts[12], XIPts[14], XIPts[15], false);
     
     // top rite far
-    XITri[i++] = new Tri(XIPts[ 2], XIPts[ 3], XIPts[24]);
-    XITri[i++] = new Tri(XIPts[ 2], XIPts[24], XIPts[25]);
+    XITri[i++] = new Tri(XIPts[ 2], XIPts[ 3], XIPts[24], false);
+    XITri[i++] = new Tri(XIPts[ 2], XIPts[24], XIPts[25], false);
     // top left far
-    XITri[i++] = new Tri(XIPts[ 6], XIPts[ 7], XIPts[26]);
-    XITri[i++] = new Tri(XIPts[ 6], XIPts[26], XIPts[27]);
+    XITri[i++] = new Tri(XIPts[ 6], XIPts[ 7], XIPts[26], false);
+    XITri[i++] = new Tri(XIPts[ 6], XIPts[26], XIPts[27], false);
     // btm rite far
-    XITri[i++] = new Tri(XIPts[10], XIPts[11], XIPts[28]);
-    XITri[i++] = new Tri(XIPts[10], XIPts[28], XIPts[29]);
+    XITri[i++] = new Tri(XIPts[10], XIPts[11], XIPts[28], false);
+    XITri[i++] = new Tri(XIPts[10], XIPts[28], XIPts[29], false);
     // btm left far
-    XITri[i++] = new Tri(XIPts[14], XIPts[15], XIPts[30]);
-    XITri[i++] = new Tri(XIPts[14], XIPts[30], XIPts[31]);
+    XITri[i++] = new Tri(XIPts[14], XIPts[15], XIPts[30], false);
+    XITri[i++] = new Tri(XIPts[14], XIPts[30], XIPts[31], false);
     
     // top rite near
-    XITri[i++] = new Tri(XIPts[ 0], XIPts[ 1], XIPts[17]);
-    XITri[i++] = new Tri(XIPts[ 0], XIPts[16], XIPts[17]);
+    XITri[i++] = new Tri(XIPts[ 0], XIPts[ 1], XIPts[17], false);
+    XITri[i++] = new Tri(XIPts[ 0], XIPts[16], XIPts[17], false);
     // top left near
-    XITri[i++] = new Tri(XIPts[ 4], XIPts[ 5], XIPts[19]);
-    XITri[i++] = new Tri(XIPts[ 4], XIPts[18], XIPts[19]);
+    XITri[i++] = new Tri(XIPts[ 4], XIPts[ 5], XIPts[19], false);
+    XITri[i++] = new Tri(XIPts[ 4], XIPts[18], XIPts[19], false);
     // btm rite near
-    XITri[i++] = new Tri(XIPts[ 8], XIPts[ 9], XIPts[21]);
-    XITri[i++] = new Tri(XIPts[ 8], XIPts[20], XIPts[21]);
+    XITri[i++] = new Tri(XIPts[ 8], XIPts[ 9], XIPts[21], false);
+    XITri[i++] = new Tri(XIPts[ 8], XIPts[20], XIPts[21], false);
     // btm left near
-    XITri[i++] = new Tri(XIPts[12], XIPts[13], XIPts[23]);
-    XITri[i++] = new Tri(XIPts[12], XIPts[22], XIPts[23]);
+    XITri[i++] = new Tri(XIPts[12], XIPts[13], XIPts[23], false);
+    XITri[i++] = new Tri(XIPts[12], XIPts[22], XIPts[23], false);
     
     // top rite outer
-    XITri[i++] = new Tri(XIPts[ 0], XIPts[ 3], XIPts[24]);
-    XITri[i++] = new Tri(XIPts[ 0], XIPts[16], XIPts[24]);
+    XITri[i++] = new Tri(XIPts[ 0], XIPts[ 3], XIPts[24], false);
+    XITri[i++] = new Tri(XIPts[ 0], XIPts[16], XIPts[24], false);
     // top left outer
-    XITri[i++] = new Tri(XIPts[ 4], XIPts[ 7], XIPts[26]);
-    XITri[i++] = new Tri(XIPts[ 4], XIPts[18], XIPts[26]);
+    XITri[i++] = new Tri(XIPts[ 4], XIPts[ 7], XIPts[26], false);
+    XITri[i++] = new Tri(XIPts[ 4], XIPts[18], XIPts[26], false);
     // btm rite outer
-    XITri[i++] = new Tri(XIPts[ 8], XIPts[11], XIPts[28]);
-    XITri[i++] = new Tri(XIPts[ 8], XIPts[20], XIPts[28]);
+    XITri[i++] = new Tri(XIPts[ 8], XIPts[11], XIPts[28], false);
+    XITri[i++] = new Tri(XIPts[ 8], XIPts[20], XIPts[28], false);
     // btm left outer
-    XITri[i++] = new Tri(XIPts[12], XIPts[15], XIPts[30]);
-    XITri[i++] = new Tri(XIPts[12], XIPts[22], XIPts[30]);
+    XITri[i++] = new Tri(XIPts[12], XIPts[15], XIPts[30], false);
+    XITri[i++] = new Tri(XIPts[12], XIPts[22], XIPts[30], false);
     
     // top rite inner
-    XITri[i++] = new Tri(XIPts[ 1], XIPts[ 2], XIPts[25]);
-    XITri[i++] = new Tri(XIPts[ 1], XIPts[17], XIPts[25]);
+    XITri[i++] = new Tri(XIPts[ 1], XIPts[ 2], XIPts[25], false);
+    XITri[i++] = new Tri(XIPts[ 1], XIPts[17], XIPts[25], false);
     // top left inner
-    XITri[i++] = new Tri(XIPts[ 5], XIPts[ 6], XIPts[27]);
-    XITri[i++] = new Tri(XIPts[ 5], XIPts[19], XIPts[27]);
+    XITri[i++] = new Tri(XIPts[ 5], XIPts[ 6], XIPts[27], false);
+    XITri[i++] = new Tri(XIPts[ 5], XIPts[19], XIPts[27], false);
     // btm rite inner
-    XITri[i++] = new Tri(XIPts[ 9], XIPts[10], XIPts[29]);
-    XITri[i++] = new Tri(XIPts[ 9], XIPts[21], XIPts[29]);
+    XITri[i++] = new Tri(XIPts[ 9], XIPts[10], XIPts[29], false);
+    XITri[i++] = new Tri(XIPts[ 9], XIPts[21], XIPts[29], false);
     // btm left inner
-    XITri[i++] = new Tri(XIPts[13], XIPts[14], XIPts[31]);
-    XITri[i++] = new Tri(XIPts[13], XIPts[23], XIPts[31]);
+    XITri[i++] = new Tri(XIPts[13], XIPts[14], XIPts[31], false);
+    XITri[i++] = new Tri(XIPts[13], XIPts[23], XIPts[31], false);
     
     // fwd top rite inner flat
     XITri[i++] = new Tri(XIPts[16], XIPts[17], XIPts[32]);
@@ -417,6 +441,21 @@ void SetupXI()
 
 void DrawXI()
 {  
+  for (int i = 0; i < 100; i++)
+  {
+    if (XIPts[i] != null)
+    {
+      pushMatrix();
+      translate(XIPts[i].x, XIPts[i].y, XIPts[i].z);
+      rotateY(-yrot);
+            
+      //text(i, 0.0, 0.0, 0.0);
+      popMatrix();
+      
+      //XITri[i].Draw();
+    }
+  }
+  
   for (int i = 0; i < 160; i++)
   {
     if (XITri[i] != null)
@@ -432,7 +471,7 @@ void SetupIO()
   
   if (IOPts == null || IOTri == null)
   {
-    IOPts = new Point[60];
+    IOPts = new Point[100];
     
     int p = 0;
     
@@ -592,6 +631,21 @@ void SetupIO()
 
 void DrawIO()
 {  
+  for (int i = 0; i < 100; i++)
+  {
+    if (IOPts[i] != null)
+    {
+      pushMatrix();
+      translate(IOPts[i].x, IOPts[i].y, IOPts[i].z);
+      rotateY(-yrot);
+            
+      //text(i, 0.0, 0.0, 0.0);
+      popMatrix();
+      
+      //IOTri[i].Draw();
+    }
+  }
+  
   for (int i = 0; i < 160; i++)
   {
     if (IOTri[i] != null)
@@ -607,30 +661,30 @@ void SetupON()
   
   if (ONPts == null || ONTri == null)
   {
-    ONPts = new Point[60];
+    ONPts = new Point[100];
     
     int p = 0;
         
     // top fwd flat
-    ONPts[p++] = new Point(-a,  s,  s);          // 00
-    ONPts[p++] = new Point(-a,  s,  s-a);        // 00
-    ONPts[p++] = new Point( a,  s,  s-a);        // 00
-    ONPts[p++] = new Point( a,  s,  s);          // 00
+    ONPts[p++] = new Point(-a/2,  s,  s);          // 00
+    ONPts[p++] = new Point(-a/2,  s,  s-a);        // 00
+    ONPts[p++] = new Point( a/2,  s,  s-a);        // 00
+    ONPts[p++] = new Point( a/2,  s,  s);          // 00
     // top aft flat
-    ONPts[p++] = new Point(-a,  s, -s);          // 00
-    ONPts[p++] = new Point(-a,  s, -s+a);        // 00
-    ONPts[p++] = new Point( a,  s, -s+a);        // 00
-    ONPts[p++] = new Point( a,  s, -s);          // 00
+    ONPts[p++] = new Point(-a/2,  s, -s);          // 00
+    ONPts[p++] = new Point(-a/2,  s, -s+a);        // 00
+    ONPts[p++] = new Point( a/2,  s, -s+a);        // 00
+    ONPts[p++] = new Point( a/2,  s, -s);          // 00
     // btm fwd flat
-    ONPts[p++] = new Point(-a, -s,  s);          // 00
-    ONPts[p++] = new Point(-a, -s,  s-a);        // 00
-    ONPts[p++] = new Point( a, -s,  s-a);        // 00
-    ONPts[p++] = new Point( a, -s,  s);          // 00
+    ONPts[p++] = new Point(-a/2, -s,  s);          // 00
+    ONPts[p++] = new Point(-a/2, -s,  s-a);        // 00
+    ONPts[p++] = new Point( a/2, -s,  s-a);        // 00
+    ONPts[p++] = new Point( a/2, -s,  s);          // 00
     // btm aft flat
-    ONPts[p++] = new Point(-a, -s, -s);          // 00
-    ONPts[p++] = new Point(-a, -s, -s+a);        // 00
-    ONPts[p++] = new Point( a, -s, -s+a);        // 00
-    ONPts[p++] = new Point( a, -s, -s);          // 00
+    ONPts[p++] = new Point(-a/2, -s, -s);          // 00
+    ONPts[p++] = new Point(-a/2, -s, -s+a);        // 00
+    ONPts[p++] = new Point( a/2, -s, -s+a);        // 00
+    ONPts[p++] = new Point( a/2, -s, -s);          // 00
     
     // rite outer O-elbows
     ONPts[p++] = new Point( s,  0,  s);          // 00
@@ -856,7 +910,7 @@ void SetupON()
 
 void DrawON()
 {  
-  for (int i = 0; i < 60; i++)
+  for (int i = 0; i < 100; i++)
   {
     if (ONPts[i] != null)
     {
@@ -864,7 +918,6 @@ void DrawON()
       translate(ONPts[i].x, ONPts[i].y, ONPts[i].z);
       rotateY(-yrot);
             
-      //fill(color(170, 255, 255, 85));
       //text(i, 0.0, 0.0, 0.0);
       popMatrix();
       
@@ -888,7 +941,7 @@ void SetupNX()
   
   if (NXPts == null || NXTri == null)
   {
-    NXPts = new Point[64];
+    NXPts = new Point[100];
     
     int p = 0;
     
@@ -965,15 +1018,15 @@ void SetupNX()
     NXPts[p++] = new Point( s-a, -h+s, -s+nx1);      // 54 
     NXPts[p++] = new Point( s-a, -h+s, -s+nx1+a);    // 55 
     // fwd chopcross
-    NXPts[p++] = new Point( a/2,  s-2*a,  s-2*m);    // 56 
-    NXPts[p++] = new Point(-a/2,  s-2*a,  s-2*m);    // 57
-    NXPts[p++] = new Point(-a/2-m,  s-a,  s-m-a);    // 58 
-    NXPts[p++] = new Point( a/2-m,  s-a,  s-m-a);    // 59
+    NXPts[p++] = new Point(-s+  2*m,  s-2*a,  s-2*m);  // 56 
+    NXPts[p++] = new Point(-s+a+2*m,  s-2*a,  s-2*m);  // 57
+    NXPts[p++] = new Point(-s+a+  m,  s-a,  s-m-a);    // 58 
+    NXPts[p++] = new Point(-s+    m,  s-a,  s-m-a);    // 59
     // aft chopcross
-    NXPts[p++] = new Point( a/2, -s+2*a, -s+2*m);    // 60
-    NXPts[p++] = new Point(-a/2, -s+2*a, -s+2*m);    // 61
-    NXPts[p++] = new Point(-a/2+m, -s+a, -s+m+a);    // 62 
-    NXPts[p++] = new Point( a/2+m, -s+a, -s+m+a);    // 63
+    NXPts[p++] = new Point( s-  2*m, -s+2*a, -s+2*m);  // 60
+    NXPts[p++] = new Point( s-a-2*m, -s+2*a, -s+2*m);  // 61
+    NXPts[p++] = new Point( s-a-  m, -s+a, -s+m+a);    // 62 
+    NXPts[p++] = new Point( s-    m, -s+a, -s+m+a);    // 63
     
     
     NXTri = new Tri[160];
@@ -1113,17 +1166,15 @@ void SetupNX()
 
 void DrawNX()
 {  
-  for (int i = 0; i < 64; i++)
+  for (int i = 0; i < 100; i++)
   {
-    int j = (i >= 32) ? i + 0 : i;
-    if (NXPts[j] != null)
+    if (NXPts[i] != null)
     {
       pushMatrix();
-      translate(NXPts[j].x, NXPts[j].y, NXPts[j].z);
+      translate(NXPts[i].x, NXPts[i].y, NXPts[i].z);
       rotateY(-yrot);
             
-      //fill(color(170, 255, 255, 170));
-      //text(j, 0.0, 0.0, 0.0);
+      //text(i, 0.0, 0.0, 0.0);
       popMatrix();
       
       //NXTri[i].Draw();
@@ -1160,9 +1211,8 @@ float Sponk(float t, float tSus, float tDecl)
 
 void setup()
 {  
-  blendMode(ADD);
-  size(1200, 1200, P3D);
-  ortho(-600, 600, -600, 600);
+  size(512, 1280, P3D);
+  ortho(-512, 512, -1280, 1280);
   
   textSize(12);
   textAlign(CENTER, CENTER);
@@ -1171,6 +1221,9 @@ void setup()
   SetupIO();
   SetupON();
   SetupNX();
+  
+  pixShader  = loadShader("XION-pix.frag");
+  pixShader.set("pixSize", 8.0);
 }
 
 void keyPressed() 
@@ -1189,41 +1242,71 @@ void keyPressed()
 }
 
 void draw()
-{
+{ 
   /*
-  xrot = 0.2 * PI * (float(mouseY)/height - 0.5);
-  yrot = -1.5 * PI * (float(mouseX)/width - 0.5);
+  xrot = 2.1 * PI * (float(mouseY)/height - 0.5);
+  yrot = -2.1 * PI * (float(mouseX)/width - 0.5);
   */
-  // xrot = 0.2*PI;
-  tween = 0.01 * frameCount;
-  xrot = -0.05 * PI;
+  
+  float timeBase = 0.01 * frameCount;
+  tween = 0.5 + timeBase + 0.1*sin(2*PI*timeBase);
+  //tween = 2 + 0.001*sin(2*PI*timeBase);
+  //xrot = -0.05 * PI;
   yrot = 0.5 * PI * tween;
+  
   
   background(0);
   
-  fill(color(255, 255, 255, 204));
+  fill(color(255, 255, 255, 170));
   //stroke(color(0, 255, 255, 51));
   noStroke();
   
   translate(width/2, height/2, 0);
     
-  ambientLight(51, 85, 85);
-  /*
-  pointLight(204, 204, 255,  0,  2*s, 2*s);
-  pointLight(204, 255, 255, -2*s,  0, 2*s);
-  pointLight(204, 255, 255,  2*s,  0, 2*s);
-  */
-  pointLight(204, 204, 255,  0, -2*s, 2*s);
+  
   
   pushMatrix();
     translate(0, 0, -30);
     scale(2);
-    //rotateX(xrot);
+  
+  float ccc = 255*pow(0.5 + 0.5*cos(2*PI*tween),   8);
+  float fff =   s*pow(0.5 - 0.5*cos(2*PI*tween), 0.2);
+  pointLight(ccc, 255, 255,    fff,  fff,  2*s);
+  pointLight(255, ccc, 255,   -fff,  fff,  2*s);
+  pointLight(255, 255, 255,    fff,  fff,  2*s);
+  pointLight(ccc, ccc, 255,    fff, -fff,  2*s);
+  ambientLight(ccc, ccc, ccc);
+  
+    rotateX(xrot);
     rotateY(yrot);
+  /*
+  pushMatrix();
+    translate(0, 0,  s);
+    box(20, 20, 20);
+  popMatrix();
+  pushMatrix();
+    translate(0, 0, -s);
+    box(20, 20, 20);
+  popMatrix();
+  pushMatrix();
+    translate(0,  s, 0);
+    box(20, 20, 20);
+  popMatrix();
+  pushMatrix();
+    translate(0, -s, 0);
+    box(20, 20, 20);
+  popMatrix();
+  pushMatrix();
+    translate( s, 0, 0);
+    box(20, 20, 20);
+  popMatrix();
+  pushMatrix();
+    translate(-s, 0, 0);
+    box(20, 20, 20);
+  popMatrix();
     
     //box(20, 50, 100);
     
-    /*
     switch (whichShape)
     {
       case 0: DrawXI(); break;
@@ -1232,36 +1315,49 @@ void draw()
       case 3: DrawNX(); break;
     }
     */
+    
     float tLetters[] = new float[4];
     for (int i = 0; i < 4; i++)
     {
       tLetters[i] = Sponk((tween + 6-i) % 4.0 - 2.5, 0.5, 0.0);
     }
     
-    fill(color(255, 255, 255, 255*tLetters[0]));
-    pushMatrix();
-      rotateY(0.0 * PI);
-      if (tLetters[0] > 0.01) {DrawXI();}
-    popMatrix();
+    for (int i = 0; i < 8; i++)
+    {
+      pushMatrix();
+        translate(0.0, -s*2.1*((tween + i + 3.5) % 8 - 4), 0.0);
+        rotateY((-0.5*i) * PI);
+      
+        fill(color(255, 255, 255, 128*tLetters[(0+i)%4]));
+        pushMatrix();
+          rotateY(0.0 * PI);
+          if (tLetters[(0+i)%4] > 0.1) {DrawXI();}
+        popMatrix();
+        
+        fill(color(255, 255, 255, 128*tLetters[(1+i)%4]));
+        pushMatrix();
+          rotateY(0.5 * PI);
+          if (tLetters[(1+i)%4] > 0.1) {DrawIO();}
+        popMatrix();
+        
+        fill(color(255, 255, 255, 128*tLetters[(2+i)%4]));
+        pushMatrix();
+          rotateY(1.0 * PI);
+          if (tLetters[(2+i)%4] > 0.1) {DrawON();}
+        popMatrix();
+        
+        fill(color(255, 255, 255, 128*tLetters[(3+i)%4]));
+        pushMatrix();
+          rotateY(1.5 * PI);
+          if (tLetters[(3+i)%4] > 0.1) {DrawNX();}
+        popMatrix();
+      
+      popMatrix();
+    }
     
-    fill(color(255, 255, 255, 255*tLetters[1]));
-    pushMatrix();
-      rotateY(0.5 * PI);
-      if (tLetters[0] > 0.01) {DrawIO();}
-    popMatrix();
-    
-    fill(color(255, 255, 255, 255*tLetters[2]));
-    pushMatrix();
-      rotateY(1.0 * PI);
-      if (tLetters[0] > 0.01) {DrawON();}
-    popMatrix();
-    
-    fill(color(255, 255, 255, 255*tLetters[3]));
-    pushMatrix();
-      rotateY(1.5 * PI);
-      if (tLetters[0] > 0.01) {DrawNX();}
-    popMatrix();
   popMatrix();
+  
+  filter(pixShader);
   
   if (frameCount % 10 == 0)
   {
