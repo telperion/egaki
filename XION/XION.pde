@@ -1,4 +1,4 @@
-float s = 150;
+float s = 16;
 float b = s*2;
 float a = s*0.4;//2*(1 - sqrt(0.5));
 float crossRatio = (s-a/2)/s;
@@ -145,8 +145,8 @@ class Tri
       
       if (frameCount <= 1)
       {
-        print("center: (", q.x, ", ", q.y, ", ", q.z, ")\n");
-        print("normal: (", n.x, ", ", n.y, ", ", n.z, ")\n");
+        //print("center: (", q.x, ", ", q.y, ", ", q.z, ")\n");
+        //print("normal: (", n.x, ", ", n.y, ", ", n.z, ")\n");
       }
       
       float l = sqrt(n.x*n.x + n.z*n.z);
@@ -155,8 +155,8 @@ class Tri
       
       if (frameCount <= 1)
       {
-        print("phi   = ", phi   * 180 / PI, " deg\n");
-        print("theta = ", theta * 180 / PI, " deg\n");
+        //print("phi   = ", phi   * 180 / PI, " deg\n");
+        //print("theta = ", theta * 180 / PI, " deg\n");
       }
       
       for (int i = 0; i < 3; i++)
@@ -1211,8 +1211,8 @@ float Sponk(float t, float tSus, float tDecl)
 
 void setup()
 {  
-  size(512, 1280, P3D);
-  ortho(-512, 512, -1280, 1280);
+  size(1024, 768, P3D);
+  ortho(-1024, 1024, -768, 768);
   
   textSize(12);
   textAlign(CENTER, CENTER);
@@ -1248,7 +1248,7 @@ void draw()
   yrot = -2.1 * PI * (float(mouseX)/width - 0.5);
   */
   
-  float timeBase = 0.01 * frameCount;
+  float timeBase = 0.005 * frameCount;
   tween = 0.5 + timeBase + 0.1*sin(2*PI*timeBase);
   //tween = 2 + 0.001*sin(2*PI*timeBase);
   //xrot = -0.05 * PI;
@@ -1261,12 +1261,16 @@ void draw()
   //stroke(color(0, 255, 255, 51));
   noStroke();
   
+  
   translate(width/2, height/2, 0);
+  translate(-width+64, -height+160, 0);
+  
+  //rect(8, 2, 12, 24);
     
   
   
   pushMatrix();
-    translate(0, 0, -30);
+    translate(0, 0, -s*0.2);
     scale(2);
   
   float ccc = 255*pow(0.5 + 0.5*cos(2*PI*tween),   8);
@@ -1357,10 +1361,11 @@ void draw()
     
   popMatrix();
   
-  filter(pixShader);
+  // Just to simulate pixelation - can be removed.
+  //filter(pixShader);
   
-  if (frameCount % 10 == 0)
+  if (frameCount < 0)
   {
-    //saveFrame("frames/####.png");
+    saveFrame("frames/####.png");
   }
 }
