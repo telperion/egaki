@@ -10,6 +10,7 @@ float on1 = (s-a)*crossRatio;
 
 float xrot = 0;
 float yrot = 0;
+float tween = 0;
 
 int whichShape = 2;
 
@@ -845,7 +846,7 @@ void SetupON()
     ONTri[i++] = new Tri(ONPts[ 1], ONPts[46], ONPts[56]);
     ONTri[i++] = new Tri(ONPts[ 1], ONPts[46], ONPts[47]);
     ONTri[i++] = new Tri(ONPts[ 2], ONPts[43], ONPts[56]);
-    ONTri[i++] = new Tri(ONPts[ 2], ONPts[43], ONPts[44]);
+    ONTri[i++] = new Tri(ONPts[56], ONPts[43], ONPts[42]);
     ONTri[i++] = new Tri(ONPts[33], ONPts[37], ONPts[42]);
     ONTri[i++] = new Tri(ONPts[33], ONPts[42], ONPts[43]);
     ONTri[i++] = new Tri(ONPts[35], ONPts[39], ONPts[46]);
@@ -1139,10 +1140,29 @@ void DrawNX()
 }
 
 
+float Sponk(float t, float tSus, float tDecl)
+{
+  float tt = abs(t);
+  if      (tt <= tSus)
+  {
+    return 1.0;
+  }
+  else if (tt <= tSus+tDecl)
+  {
+    return 1.0 - (tt-tSus)/tDecl;
+  }
+  else
+  {
+    return 0.0;
+  }
+}
+
 
 void setup()
 {  
+  blendMode(ADD);
   size(1200, 1200, P3D);
+  ortho(-600, 600, -600, 600);
   
   textSize(12);
   textAlign(CENTER, CENTER);
@@ -1170,24 +1190,40 @@ void keyPressed()
 
 void draw()
 {
+  /*
   xrot = 0.2 * PI * (float(mouseY)/height - 0.5);
   yrot = -1.5 * PI * (float(mouseX)/width - 0.5);
+  */
+  // xrot = 0.2*PI;
+  tween = 0.01 * frameCount;
+  xrot = -0.05 * PI;
+  yrot = 0.5 * PI * tween;
   
   background(0);
   
-  fill(color(170, 255, 255, 85));
-  stroke(color(0, 255, 255, 51));
+  fill(color(255, 255, 255, 204));
+  //stroke(color(0, 255, 255, 51));
+  noStroke();
   
   translate(width/2, height/2, 0);
+    
+  ambientLight(51, 85, 85);
+  /*
+  pointLight(204, 204, 255,  0,  2*s, 2*s);
+  pointLight(204, 255, 255, -2*s,  0, 2*s);
+  pointLight(204, 255, 255,  2*s,  0, 2*s);
+  */
+  pointLight(204, 204, 255,  0, -2*s, 2*s);
   
   pushMatrix();
     translate(0, 0, -30);
     scale(2);
+    //rotateX(xrot);
     rotateY(yrot);
-    rotateX(xrot);
     
     //box(20, 50, 100);
     
+    /*
     switch (whichShape)
     {
       case 0: DrawXI(); break;
@@ -1195,6 +1231,36 @@ void draw()
       case 2: DrawON(); break;
       case 3: DrawNX(); break;
     }
+    */
+    float tLetters[] = new float[4];
+    for (int i = 0; i < 4; i++)
+    {
+      tLetters[i] = Sponk((tween + 6-i) % 4.0 - 2.5, 0.5, 0.0);
+    }
+    
+    fill(color(255, 255, 255, 255*tLetters[0]));
+    pushMatrix();
+      rotateY(0.0 * PI);
+      if (tLetters[0] > 0.01) {DrawXI();}
+    popMatrix();
+    
+    fill(color(255, 255, 255, 255*tLetters[1]));
+    pushMatrix();
+      rotateY(0.5 * PI);
+      if (tLetters[0] > 0.01) {DrawIO();}
+    popMatrix();
+    
+    fill(color(255, 255, 255, 255*tLetters[2]));
+    pushMatrix();
+      rotateY(1.0 * PI);
+      if (tLetters[0] > 0.01) {DrawON();}
+    popMatrix();
+    
+    fill(color(255, 255, 255, 255*tLetters[3]));
+    pushMatrix();
+      rotateY(1.5 * PI);
+      if (tLetters[0] > 0.01) {DrawNX();}
+    popMatrix();
   popMatrix();
   
   if (frameCount % 10 == 0)
