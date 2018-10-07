@@ -7,8 +7,10 @@ float h = s*2*(s-a)/(s-a/2);
 float w = (s-a)*(h-s)/s;
 float nx1 = (2*s-h)*crossRatio;
 
-float xrot;
-float yrot;
+float xrot = 0;
+float yrot = 0;
+
+int whichShape = 3;
 
 Point XIPts[];
 Tri   XITri[];
@@ -802,21 +804,91 @@ void SetupNX()
     // fwd chopcross
     NXPts[p++] = new Point( a/2,  s-2*a,  s-2*m);    // 56 
     NXPts[p++] = new Point(-a/2,  s-2*a,  s-2*m);    // 57
-    NXPts[p++] = new Point(-a/2+m,  s-a,    s-m);    // 58 
+    NXPts[p++] = new Point(-a/2-m,  s-a,    s-m);    // 58 
     NXPts[p++] = new Point( a/2-m,  s-a,    s-m);    // 59
     // aft chopcross
     NXPts[p++] = new Point( a/2, -s+2*a, -s+2*m);    // 60
     NXPts[p++] = new Point(-a/2, -s+2*a, -s+2*m);    // 61
     NXPts[p++] = new Point(-a/2+m, -s+a,   -s+m);    // 62 
-    NXPts[p++] = new Point( a/2-m, -s+a,   -s+m);    // 63
+    NXPts[p++] = new Point( a/2+m, -s+a,   -s+m);    // 63
     
     
     NXTri = new Tri[100];
     
     int i = 0;        
-    
-    // top rite flat
+            
+    // top rite fwd flat
     NXTri[i++] = new Tri(NXPts[ 0], NXPts[ 1], NXPts[ 2]);
+    NXTri[i++] = new Tri(NXPts[ 0], NXPts[ 2], NXPts[ 3]);
+    // top rite aft flat
+    NXTri[i++] = new Tri(NXPts[ 4], NXPts[ 5], NXPts[ 6]);
+    NXTri[i++] = new Tri(NXPts[ 4], NXPts[ 6], NXPts[ 7]);
+    // top left fwd flat
+    NXTri[i++] = new Tri(NXPts[ 8], NXPts[ 9], NXPts[10]);
+    NXTri[i++] = new Tri(NXPts[ 8], NXPts[10], NXPts[11]);
+    // top left aft flat
+    NXTri[i++] = new Tri(NXPts[12], NXPts[13], NXPts[14]);
+    NXTri[i++] = new Tri(NXPts[12], NXPts[14], NXPts[15]);
+    // btm rite fwd flat
+    NXTri[i++] = new Tri(NXPts[16], NXPts[17], NXPts[18]);
+    NXTri[i++] = new Tri(NXPts[16], NXPts[18], NXPts[19]);
+    // btm rite aft flat
+    NXTri[i++] = new Tri(NXPts[20], NXPts[21], NXPts[22]);
+    NXTri[i++] = new Tri(NXPts[20], NXPts[22], NXPts[23]);
+    // btm left fwd flat
+    NXTri[i++] = new Tri(NXPts[24], NXPts[25], NXPts[26]);
+    NXTri[i++] = new Tri(NXPts[24], NXPts[26], NXPts[27]);
+    // btm left aft flat
+    NXTri[i++] = new Tri(NXPts[28], NXPts[29], NXPts[30]);
+    NXTri[i++] = new Tri(NXPts[28], NXPts[30], NXPts[31]);
+    
+    // rite outer tilted entire N
+    NXTri[i++] = new Tri(NXPts[ 4], NXPts[ 5], NXPts[17]);
+    NXTri[i++] = new Tri(NXPts[ 5], NXPts[16], NXPts[17]);
+    // left outer tilted entire N
+    NXTri[i++] = new Tri(NXPts[12], NXPts[13], NXPts[25]);
+    NXTri[i++] = new Tri(NXPts[13], NXPts[24], NXPts[25]);
+    // rite inner straight tilted entire N
+    NXTri[i++] = new Tri(NXPts[ 6], NXPts[ 7], NXPts[53]);
+    NXTri[i++] = new Tri(NXPts[ 6], NXPts[52], NXPts[53]);
+    // left inner straight tilted entire N
+    NXTri[i++] = new Tri(NXPts[26], NXPts[27], NXPts[51]);
+    NXTri[i++] = new Tri(NXPts[26], NXPts[50], NXPts[51]);
+    // rite inner oblique tilted entire N
+    NXTri[i++] = new Tri(NXPts[18], NXPts[19], NXPts[50]);
+    NXTri[i++] = new Tri(NXPts[19], NXPts[50], NXPts[51]);
+    // left inner oblique tilted entire N
+    NXTri[i++] = new Tri(NXPts[14], NXPts[15], NXPts[52]);
+    NXTri[i++] = new Tri(NXPts[15], NXPts[52], NXPts[53]);
+    // top rite straight tilted entire N
+    NXTri[i++] = new Tri(NXPts[ 5], NXPts[ 6], NXPts[16]);
+    NXTri[i++] = new Tri(NXPts[ 6], NXPts[16], NXPts[19]);
+    // top left straight tilted entire N
+    NXTri[i++] = new Tri(NXPts[13], NXPts[14], NXPts[27]);
+    NXTri[i++] = new Tri(NXPts[13], NXPts[24], NXPts[27]);
+    // top crossbar tilted entire N
+    NXTri[i++] = new Tri(NXPts[14], NXPts[51], NXPts[52]);
+    NXTri[i++] = new Tri(NXPts[19], NXPts[51], NXPts[52]);
+    // btm rite straight tilted entire N
+    NXTri[i++] = new Tri(NXPts[ 4], NXPts[ 7], NXPts[17]);
+    NXTri[i++] = new Tri(NXPts[ 7], NXPts[17], NXPts[18]);
+    // btm left straight tilted entire N
+    NXTri[i++] = new Tri(NXPts[12], NXPts[15], NXPts[26]);
+    NXTri[i++] = new Tri(NXPts[12], NXPts[25], NXPts[26]);
+    // btm crossbar tilted entire N
+    NXTri[i++] = new Tri(NXPts[15], NXPts[50], NXPts[53]);
+    NXTri[i++] = new Tri(NXPts[18], NXPts[50], NXPts[53]);
+    
+    // fwd rite chopside
+    // aft rite chopside
+    // fwd left chopside
+    // aft left chopside
+    // top fwd N-elbow
+    // top aft N-elbow
+    // btm fwd N-elbow
+    // btm aft N-elbow
+    // fwd chopcross
+    // aft chopcross
   }
 }
 
@@ -835,7 +907,15 @@ void DrawNX()
       text(j, 0.0, 0.0, 0.0);
       popMatrix();
       
-      //ONTri[i].Draw();
+      //NXTri[i].Draw();
+    }
+  }
+  
+  for (int i = 0; i < 100; i++)
+  {
+    if (NXTri[i] != null)
+    {
+      NXTri[i].Draw();
     }
   }
 }
@@ -855,10 +935,25 @@ void setup()
   SetupNX();
 }
 
+void keyPressed() 
+{
+  if (key == CODED)
+  {
+    if (keyCode == UP || keyCode == RIGHT)
+    {
+      whichShape = (whichShape+1)%4;
+    }
+    else if (keyCode == DOWN || keyCode == LEFT)
+    {
+      whichShape = (whichShape+3)%4;
+    }
+  }
+}
+
 void draw()
 {
   xrot = 0.2 * PI * (float(mouseY)/height - 0.5);
-  yrot = -0.5 * PI * float(mouseX)/width;
+  yrot = -1.0 * PI * (float(mouseX)/width - 0.25);
   
   background(0);
   
@@ -875,11 +970,13 @@ void draw()
     
     //box(20, 50, 100);
     
-    //DrawXI();
-    //DrawIO();
-    //DrawON();
-    DrawNX();
-    //DrawTest();
+    switch (whichShape)
+    {
+      case 0: DrawXI(); break;
+      case 1: DrawIO(); break;
+      case 2: DrawON(); break;
+      case 3: DrawNX(); break;
+    }
   popMatrix();
   
   if (frameCount % 10 == 0)
