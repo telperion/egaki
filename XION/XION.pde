@@ -6,6 +6,7 @@ float m = a*crossRatio;
 float h = s*2*(s-a)/(s-a/2);
 float w = (s-a)*(h-s)/s;
 float nx1 = (2*s-h)*crossRatio;
+float on1 = (s-a)*crossRatio;
 
 float xrot = 0;
 float yrot = 0;
@@ -280,7 +281,7 @@ void SetupXI()
     
     
     
-    XITri = new Tri[100];
+    XITri = new Tri[160];
     
     int i = 0;
         
@@ -415,7 +416,7 @@ void SetupXI()
 
 void DrawXI()
 {  
-  for (int i = 0; i < 76; i++)
+  for (int i = 0; i < 160; i++)
   {
     if (XITri[i] != null)
     {
@@ -486,7 +487,7 @@ void SetupIO()
     IOPts[p++] = new Point(-a/2, -s+a, 0);         // 35
              
     
-    IOTri = new Tri[100];
+    IOTri = new Tri[160];
     
     int i = 0;        
         
@@ -590,7 +591,7 @@ void SetupIO()
 
 void DrawIO()
 {  
-  for (int i = 0; i < 60; i++)
+  for (int i = 0; i < 160; i++)
   {
     if (IOTri[i] != null)
     {
@@ -605,7 +606,7 @@ void SetupON()
   
   if (ONPts == null || ONTri == null)
   {
-    ONPts = new Point[56];
+    ONPts = new Point[60];
     
     int p = 0;
         
@@ -665,15 +666,15 @@ void SetupON()
     ONPts[p++] = new Point(-s+w+a, -h+s, -s+a);  // 00
     
     // rite N-elbows
-    ONPts[p++] = new Point( s,    0,  s-a);      // 00
-    ONPts[p++] = new Point( s-a,  0,  s-a);      // 00
-    ONPts[p++] = new Point( s-a,  0, -s+a);      // 00
-    ONPts[p++] = new Point( s,    0, -s+a);      // 00
+    ONPts[p++] = new Point( s,    0,  a/2);      // 00
+    ONPts[p++] = new Point( s-a,  0,  a/2);      // 00
+    ONPts[p++] = new Point( s-a,  0, -a/2);      // 00
+    ONPts[p++] = new Point( s,    0, -a/2);      // 00
     // left N-elbows
-    ONPts[p++] = new Point(-s,    0,  s-a);      // 00
-    ONPts[p++] = new Point(-s+a,  0,  s-a);      // 00
-    ONPts[p++] = new Point(-s+a,  0, -s+a);      // 00
-    ONPts[p++] = new Point(-s,    0, -s+a);      // 00
+    ONPts[p++] = new Point(-s,    0,  a/2);      // 00
+    ONPts[p++] = new Point(-s+a,  0,  a/2);      // 00
+    ONPts[p++] = new Point(-s+a,  0, -a/2);      // 00
+    ONPts[p++] = new Point(-s,    0, -a/2);      // 00
     
     // top fwd O-point
     ONPts[p++] = new Point(0,  s-a,  s);         // 00
@@ -688,20 +689,173 @@ void SetupON()
     ONPts[p++] = new Point(0, -s+a, -s);         // 00
     ONPts[p++] = new Point(0, -s+a, -s+a);       // 00
     
+    // top fwd/inner O-point
+    ONPts[p++] = new Point(0,  s-a,  on1-a/2);   // 00
+    ONPts[p++] = new Point(0,  s-a,  on1+a/2);   // 00
+    // btm aft/inner O-point
+    ONPts[p++] = new Point(0, -s+a, -on1-a/2);   // 00
+    ONPts[p++] = new Point(0, -s+a, -on1+a/2);   // 00
     
     
-    ONTri = new Tri[100];
+    
+    ONTri = new Tri[160];
     
     int i = 0;        
-    
-    // top rite flat
+        
+    // top fwd flat
     ONTri[i++] = new Tri(ONPts[ 0], ONPts[ 1], ONPts[ 2]);
+    ONTri[i++] = new Tri(ONPts[ 0], ONPts[ 2], ONPts[ 3]);
+    // top aft flat
+    ONTri[i++] = new Tri(ONPts[ 4], ONPts[ 5], ONPts[ 6]);
+    ONTri[i++] = new Tri(ONPts[ 4], ONPts[ 6], ONPts[ 7]);
+    // btm fwd flat
+    ONTri[i++] = new Tri(ONPts[ 8], ONPts[ 9], ONPts[10]);
+    ONTri[i++] = new Tri(ONPts[ 8], ONPts[10], ONPts[11]);
+    // btm aft flat
+    ONTri[i++] = new Tri(ONPts[12], ONPts[13], ONPts[14]);
+    ONTri[i++] = new Tri(ONPts[12], ONPts[14], ONPts[15]);
+    
+    // fwd O-side
+    ONTri[i++] = new Tri(ONPts[ 0], ONPts[ 3], ONPts[48]);
+    ONTri[i++] = new Tri(ONPts[ 0], ONPts[20], ONPts[48]);
+    ONTri[i++] = new Tri(ONPts[20], ONPts[28], ONPts[48]);
+    ONTri[i++] = new Tri(ONPts[ 3], ONPts[16], ONPts[48]);
+    ONTri[i++] = new Tri(ONPts[16], ONPts[24], ONPts[48]);
+    ONTri[i++] = new Tri(ONPts[ 8], ONPts[20], ONPts[28]);
+    ONTri[i++] = new Tri(ONPts[ 8], ONPts[28], ONPts[52]);
+    ONTri[i++] = new Tri(ONPts[11], ONPts[16], ONPts[24]);
+    ONTri[i++] = new Tri(ONPts[11], ONPts[24], ONPts[52]);
+    ONTri[i++] = new Tri(ONPts[ 8], ONPts[11], ONPts[52]);
+    // aft O-side
+    ONTri[i++] = new Tri(ONPts[ 4], ONPts[ 7], ONPts[50]);
+    ONTri[i++] = new Tri(ONPts[ 4], ONPts[23], ONPts[50]);
+    ONTri[i++] = new Tri(ONPts[23], ONPts[31], ONPts[50]);
+    ONTri[i++] = new Tri(ONPts[ 7], ONPts[19], ONPts[50]);
+    ONTri[i++] = new Tri(ONPts[19], ONPts[27], ONPts[50]);
+    ONTri[i++] = new Tri(ONPts[12], ONPts[23], ONPts[31]);
+    ONTri[i++] = new Tri(ONPts[12], ONPts[31], ONPts[54]);
+    ONTri[i++] = new Tri(ONPts[15], ONPts[19], ONPts[27]);
+    ONTri[i++] = new Tri(ONPts[15], ONPts[27], ONPts[54]);
+    ONTri[i++] = new Tri(ONPts[12], ONPts[15], ONPts[54]);
+    
+    // fwd btm rite O-side
+    ONTri[i++] = new Tri(ONPts[ 8], ONPts[ 9], ONPts[20]);
+    ONTri[i++] = new Tri(ONPts[ 9], ONPts[20], ONPts[21]);
+    // fwd btm left O-side
+    ONTri[i++] = new Tri(ONPts[10], ONPts[11], ONPts[16]);
+    ONTri[i++] = new Tri(ONPts[10], ONPts[16], ONPts[17]);    
+    // aft top rite O-side
+    ONTri[i++] = new Tri(ONPts[ 6], ONPts[ 7], ONPts[18]);
+    ONTri[i++] = new Tri(ONPts[ 7], ONPts[18], ONPts[19]);
+    // aft top left O-side
+    ONTri[i++] = new Tri(ONPts[ 4], ONPts[ 5], ONPts[23]);
+    ONTri[i++] = new Tri(ONPts[ 5], ONPts[22], ONPts[23]);
+    
+    // rite top around the crossbend
+    ONTri[i++] = new Tri(ONPts[ 2], ONPts[ 3], ONPts[16]);
+    ONTri[i++] = new Tri(ONPts[ 2], ONPts[16], ONPts[17]);
+    ONTri[i++] = new Tri(ONPts[ 2], ONPts[32], ONPts[40]);
+    ONTri[i++] = new Tri(ONPts[ 2], ONPts[40], ONPts[43]);
+    // rite btm around the crossbend
+    ONTri[i++] = new Tri(ONPts[14], ONPts[15], ONPts[19]);
+    ONTri[i++] = new Tri(ONPts[14], ONPts[19], ONPts[18]);
+    ONTri[i++] = new Tri(ONPts[14], ONPts[33], ONPts[43]);
+    ONTri[i++] = new Tri(ONPts[14], ONPts[43], ONPts[40]);
+    // left top around the crossbend
+    ONTri[i++] = new Tri(ONPts[13], ONPts[12], ONPts[23]);
+    ONTri[i++] = new Tri(ONPts[13], ONPts[23], ONPts[22]);
+    ONTri[i++] = new Tri(ONPts[13], ONPts[35], ONPts[47]);
+    ONTri[i++] = new Tri(ONPts[13], ONPts[47], ONPts[44]);
+    // left btm around the crossbend
+    ONTri[i++] = new Tri(ONPts[ 1], ONPts[ 0], ONPts[20]);
+    ONTri[i++] = new Tri(ONPts[ 1], ONPts[20], ONPts[21]);
+    ONTri[i++] = new Tri(ONPts[ 1], ONPts[34], ONPts[44]);
+    ONTri[i++] = new Tri(ONPts[ 1], ONPts[44], ONPts[47]);
+    
+    
+    // fwd btm inner O-side
+    ONTri[i++] = new Tri(ONPts[ 9], ONPts[10], ONPts[53]);
+    ONTri[i++] = new Tri(ONPts[ 9], ONPts[29], ONPts[53]);
+    ONTri[i++] = new Tri(ONPts[ 9], ONPts[21], ONPts[29]);
+    ONTri[i++] = new Tri(ONPts[10], ONPts[25], ONPts[53]);
+    ONTri[i++] = new Tri(ONPts[10], ONPts[17], ONPts[25]);
+    ONTri[i++] = new Tri(ONPts[21], ONPts[29], ONPts[38]);
+    ONTri[i++] = new Tri(ONPts[21], ONPts[34], ONPts[38]);
+    ONTri[i++] = new Tri(ONPts[17], ONPts[25], ONPts[32]);
+    ONTri[i++] = new Tri(ONPts[25], ONPts[32], ONPts[36]);
+    // aft top inner O-side
+    ONTri[i++] = new Tri(ONPts[ 5], ONPts[ 6], ONPts[51]);
+    ONTri[i++] = new Tri(ONPts[ 5], ONPts[30], ONPts[51]);
+    ONTri[i++] = new Tri(ONPts[ 5], ONPts[22], ONPts[30]);
+    ONTri[i++] = new Tri(ONPts[ 6], ONPts[26], ONPts[51]);
+    ONTri[i++] = new Tri(ONPts[ 6], ONPts[18], ONPts[26]);
+    ONTri[i++] = new Tri(ONPts[22], ONPts[30], ONPts[39]);
+    ONTri[i++] = new Tri(ONPts[22], ONPts[35], ONPts[39]);
+    ONTri[i++] = new Tri(ONPts[18], ONPts[26], ONPts[33]);
+    ONTri[i++] = new Tri(ONPts[26], ONPts[33], ONPts[37]);
+    
+    // fwd inner O-ring
+    ONTri[i++] = new Tri(ONPts[24], ONPts[25], ONPts[48]);
+    ONTri[i++] = new Tri(ONPts[25], ONPts[48], ONPts[49]);
+    ONTri[i++] = new Tri(ONPts[24], ONPts[25], ONPts[52]);
+    ONTri[i++] = new Tri(ONPts[25], ONPts[52], ONPts[53]);
+    ONTri[i++] = new Tri(ONPts[28], ONPts[29], ONPts[48]);
+    ONTri[i++] = new Tri(ONPts[29], ONPts[48], ONPts[49]);
+    ONTri[i++] = new Tri(ONPts[28], ONPts[29], ONPts[52]);
+    ONTri[i++] = new Tri(ONPts[29], ONPts[52], ONPts[53]);
+    // aft inner O-ring
+    ONTri[i++] = new Tri(ONPts[26], ONPts[27], ONPts[50]);
+    ONTri[i++] = new Tri(ONPts[26], ONPts[50], ONPts[51]);
+    ONTri[i++] = new Tri(ONPts[26], ONPts[27], ONPts[54]);
+    ONTri[i++] = new Tri(ONPts[26], ONPts[54], ONPts[55]);
+    ONTri[i++] = new Tri(ONPts[30], ONPts[31], ONPts[50]);
+    ONTri[i++] = new Tri(ONPts[30], ONPts[50], ONPts[51]);
+    ONTri[i++] = new Tri(ONPts[30], ONPts[31], ONPts[54]);
+    ONTri[i++] = new Tri(ONPts[30], ONPts[54], ONPts[55]);
+    
+    // binders between verticals and crossbar of N
+    ONTri[i++] = new Tri(ONPts[30], ONPts[39], ONPts[58]);
+    ONTri[i++] = new Tri(ONPts[26], ONPts[37], ONPts[58]);
+    ONTri[i++] = new Tri(ONPts[29], ONPts[38], ONPts[57]);
+    ONTri[i++] = new Tri(ONPts[25], ONPts[36], ONPts[57]);
+    
+    // crossbar internal O-ring
+    ONTri[i++] = new Tri(ONPts[41], ONPts[42], ONPts[59]);
+    ONTri[i++] = new Tri(ONPts[42], ONPts[58], ONPts[59]);
+    ONTri[i++] = new Tri(ONPts[41], ONPts[42], ONPts[57]);
+    ONTri[i++] = new Tri(ONPts[42], ONPts[56], ONPts[57]);
+    ONTri[i++] = new Tri(ONPts[45], ONPts[46], ONPts[59]);
+    ONTri[i++] = new Tri(ONPts[46], ONPts[58], ONPts[59]);
+    ONTri[i++] = new Tri(ONPts[45], ONPts[46], ONPts[57]);
+    ONTri[i++] = new Tri(ONPts[46], ONPts[56], ONPts[57]);
+    
+    
+    // fwd btm inner O-crossbar-side
+    ONTri[i++] = new Tri(ONPts[13], ONPts[14], ONPts[59]);
+    ONTri[i++] = new Tri(ONPts[13], ONPts[45], ONPts[59]);
+    ONTri[i++] = new Tri(ONPts[13], ONPts[44], ONPts[45]);
+    ONTri[i++] = new Tri(ONPts[14], ONPts[41], ONPts[59]);
+    ONTri[i++] = new Tri(ONPts[14], ONPts[41], ONPts[40]);
+    ONTri[i++] = new Tri(ONPts[34], ONPts[38], ONPts[44]);
+    ONTri[i++] = new Tri(ONPts[38], ONPts[44], ONPts[45]);
+    ONTri[i++] = new Tri(ONPts[32], ONPts[36], ONPts[40]);
+    ONTri[i++] = new Tri(ONPts[36], ONPts[40], ONPts[41]);
+    // aft top inner O-crossbar-side
+    ONTri[i++] = new Tri(ONPts[ 1], ONPts[ 2], ONPts[56]);
+    ONTri[i++] = new Tri(ONPts[ 1], ONPts[46], ONPts[56]);
+    ONTri[i++] = new Tri(ONPts[ 1], ONPts[46], ONPts[47]);
+    ONTri[i++] = new Tri(ONPts[ 2], ONPts[43], ONPts[56]);
+    ONTri[i++] = new Tri(ONPts[ 2], ONPts[43], ONPts[44]);
+    ONTri[i++] = new Tri(ONPts[33], ONPts[37], ONPts[42]);
+    ONTri[i++] = new Tri(ONPts[33], ONPts[42], ONPts[43]);
+    ONTri[i++] = new Tri(ONPts[35], ONPts[39], ONPts[46]);
+    ONTri[i++] = new Tri(ONPts[35], ONPts[46], ONPts[47]);
   }
 }
 
 void DrawON()
 {  
-  for (int i = 0; i < 56; i++)
+  for (int i = 0; i < 60; i++)
   {
     if (ONPts[i] != null)
     {
@@ -709,11 +863,19 @@ void DrawON()
       translate(ONPts[i].x, ONPts[i].y, ONPts[i].z);
       rotateY(-yrot);
             
-      fill(color(170, 255, 255, 170));
-      text(i, 0.0, 0.0, 0.0);
+      //fill(color(170, 255, 255, 85));
+      //text(i, 0.0, 0.0, 0.0);
       popMatrix();
       
       //ONTri[i].Draw();
+    }
+  }
+  
+  for (int i = 0; i < 160; i++)
+  {
+    if (ONTri[i] != null)
+    {
+      ONTri[i].Draw();
     }
   }
 }
@@ -813,7 +975,7 @@ void SetupNX()
     NXPts[p++] = new Point( a/2+m, -s+a, -s+m+a);    // 63
     
     
-    NXTri = new Tri[100];
+    NXTri = new Tri[160];
     
     int i = 0;        
             
@@ -967,7 +1129,7 @@ void DrawNX()
     }
   }
   
-  for (int i = 0; i < 100; i++)
+  for (int i = 0; i < 160; i++)
   {
     if (NXTri[i] != null)
     {
@@ -1009,7 +1171,7 @@ void keyPressed()
 void draw()
 {
   xrot = 0.2 * PI * (float(mouseY)/height - 0.5);
-  yrot = -2.0 * PI * (float(mouseX)/width - 0.25);
+  yrot = -1.5 * PI * (float(mouseX)/width - 0.5);
   
   background(0);
   
