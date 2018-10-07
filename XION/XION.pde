@@ -1,9 +1,14 @@
-float s = 100;
+float s = 180;
 float b = s*2;
-float a = s*2*(1 - sqrt(0.5));    
-float m = a*(s-a/2)/s;
+float a = s*0.4;//2*(1 - sqrt(0.5));
+float crossRatio = (s-a/2)/s;
+float m = a*crossRatio;
 float h = s*2*(s-a)/(s-a/2);
 float w = (s-a)*(h-s)/s;
+float nx1 = (2*s-h)*crossRatio;
+
+float xrot;
+float yrot;
 
 Point XIPts[];
 Tri   XITri[];
@@ -700,7 +705,7 @@ void DrawON()
     {
       pushMatrix();
       translate(ONPts[i].x, ONPts[i].y, ONPts[i].z);
-      rotateY(-0.001 * PI * frameCount);
+      rotateY(-yrot);
             
       fill(color(170, 255, 255, 170));
       text(i, 0.0, 0.0, 0.0);
@@ -718,14 +723,92 @@ void SetupNX()
   
   if (NXPts == null || NXTri == null)
   {
-    NXPts = new Point[60];
+    NXPts = new Point[64];
     
     int p = 0;
     
-    // top rite flat
+    // top rite fwd flat
     NXPts[p++] = new Point( s,    s,    s);          // 00 
-    NXPts[p++] = new Point( s,    s,    s);          // 00 
-    NXPts[p++] = new Point( s,    s,    s);          // 00 
+    NXPts[p++] = new Point( s,    s,    s-a);        // 01
+    NXPts[p++] = new Point( s-a,  s,    s-a);        // 02 
+    NXPts[p++] = new Point( s-a,  s,    s);          // 03 
+    // top rite aft flat
+    NXPts[p++] = new Point( s,    s,   -s);          // 04 
+    NXPts[p++] = new Point( s,    s,   -s+a);        // 05 
+    NXPts[p++] = new Point( s-a,  s,   -s+a);        // 06 
+    NXPts[p++] = new Point( s-a,  s,   -s);          // 07 
+    // top left fwd flat
+    NXPts[p++] = new Point(-s,    s,    s);          // 08 
+    NXPts[p++] = new Point(-s,    s,    s-a);        // 09 
+    NXPts[p++] = new Point(-s+a,  s,    s-a);        // 10 
+    NXPts[p++] = new Point(-s+a,  s,    s);          // 11 
+    // top left aft flat
+    NXPts[p++] = new Point(-s,    s,   -s);          // 12 
+    NXPts[p++] = new Point(-s,    s,   -s+a);        // 13 
+    NXPts[p++] = new Point(-s+a,  s,   -s+a);        // 14 
+    NXPts[p++] = new Point(-s+a,  s,   -s);          // 15 
+    // btm rite fwd flat
+    NXPts[p++] = new Point( s,   -s,    s);          // 16 
+    NXPts[p++] = new Point( s,   -s,    s-a);        // 17 
+    NXPts[p++] = new Point( s-a, -s,    s-a);        // 18 
+    NXPts[p++] = new Point( s-a, -s,    s);          // 19 
+    // btm rite aft flat
+    NXPts[p++] = new Point( s,   -s,   -s);          // 20 
+    NXPts[p++] = new Point( s,   -s,   -s+a);        // 21 
+    NXPts[p++] = new Point( s-a, -s,   -s+a);        // 22 
+    NXPts[p++] = new Point( s-a, -s,   -s);          // 23 
+    // btm left fwd flat
+    NXPts[p++] = new Point(-s,   -s,    s);          // 24 
+    NXPts[p++] = new Point(-s,   -s,    s-a);        // 25 
+    NXPts[p++] = new Point(-s+a, -s,    s-a);        // 26 
+    NXPts[p++] = new Point(-s+a, -s,    s);          // 27 
+    // btm left aft flat
+    NXPts[p++] = new Point(-s,   -s,   -s);          // 28
+    NXPts[p++] = new Point(-s,   -s,   -s+a);        // 29 
+    NXPts[p++] = new Point(-s+a, -s,   -s+a);        // 30 
+    NXPts[p++] = new Point(-s+a, -s,   -s);          // 31 
+    // fwd rite chopside
+    NXPts[p++] = new Point( s,    s-a,    s-m-a);    // 32 
+    NXPts[p++] = new Point( s-a,  s-a,    s-m-a);    // 33 
+    NXPts[p++] = new Point( s-a,  s-2*a,  s-2*m);    // 34 
+    NXPts[p++] = new Point( s,    s-2*a,  s-2*m);    // 35 
+    // aft rite chopside
+    NXPts[p++] = new Point( s,   -s+a,   -s+m+a);    // 36 
+    NXPts[p++] = new Point( s-a, -s+a,   -s+m+a);    // 37 
+    NXPts[p++] = new Point( s-a, -s+2*a, -s+2*m);    // 38 
+    NXPts[p++] = new Point( s,   -s+2*a, -s+2*m);    // 39
+    // fwd left chopside
+    NXPts[p++] = new Point(-s,    s-a,    s-m-a);    // 40
+    NXPts[p++] = new Point(-s+a,  s-a,    s-m-a);    // 41 
+    NXPts[p++] = new Point(-s+a,  s-2*a,  s-2*m);    // 42 
+    NXPts[p++] = new Point(-s,    s-2*a,  s-2*m);    // 43 
+    // aft left chopside
+    NXPts[p++] = new Point(-s,   -s+a,   -s+m+a);    // 44 
+    NXPts[p++] = new Point(-s+a, -s+a,   -s+m+a);    // 45 
+    NXPts[p++] = new Point(-s+a, -s+2*a, -s+2*m);    // 46 
+    NXPts[p++] = new Point(-s,   -s+2*a, -s+2*m);    // 47
+    // top fwd N-elbow
+    NXPts[p++] = new Point(-s+a,  h-s,  s-nx1);      // 48 
+    NXPts[p++] = new Point(-s+a,  h-s,  s-nx1-a);    // 49 
+    // top aft N-elbow
+    NXPts[p++] = new Point(-s+a,  h-s, -s+nx1);      // 50 
+    NXPts[p++] = new Point(-s+a,  h-s, -s+nx1+a);    // 51 
+    // btm fwd N-elbow
+    NXPts[p++] = new Point( s-a, -h+s,  s-nx1);      // 52 
+    NXPts[p++] = new Point( s-a, -h+s,  s-nx1-a);    // 53 
+    // btm aft N-elbow
+    NXPts[p++] = new Point( s-a, -h+s, -s+nx1);      // 54 
+    NXPts[p++] = new Point( s-a, -h+s, -s+nx1+a);    // 55 
+    // fwd chopcross
+    NXPts[p++] = new Point( a/2,  s-2*a,  s-2*m);    // 56 
+    NXPts[p++] = new Point(-a/2,  s-2*a,  s-2*m);    // 57
+    NXPts[p++] = new Point(-a/2+m,  s-a,    s-m);    // 58 
+    NXPts[p++] = new Point( a/2-m,  s-a,    s-m);    // 59
+    // aft chopcross
+    NXPts[p++] = new Point( a/2, -s+2*a, -s+2*m);    // 60
+    NXPts[p++] = new Point(-a/2, -s+2*a, -s+2*m);    // 61
+    NXPts[p++] = new Point(-a/2+m, -s+a,   -s+m);    // 62 
+    NXPts[p++] = new Point( a/2-m, -s+a,   -s+m);    // 63
     
     
     NXTri = new Tri[100];
@@ -739,11 +822,20 @@ void SetupNX()
 
 void DrawNX()
 {  
-  for (int i = 0; i < 0; i++)
+  for (int i = 0; i < 64; i++)
   {
-    if (NXTri[i] != null)
+    int j = (i >= 32) ? i + 0 : i;
+    if (NXPts[j] != null)
     {
-      NXTri[i].Draw();
+      pushMatrix();
+      translate(NXPts[j].x, NXPts[j].y, NXPts[j].z);
+      rotateY(-yrot);
+            
+      fill(color(170, 255, 255, 170));
+      text(j, 0.0, 0.0, 0.0);
+      popMatrix();
+      
+      //ONTri[i].Draw();
     }
   }
 }
@@ -752,7 +844,7 @@ void DrawNX()
 
 void setup()
 {  
-  size(720, 720, P3D);
+  size(1200, 1200, P3D);
   
   textSize(12);
   textAlign(CENTER, CENTER);
@@ -765,6 +857,9 @@ void setup()
 
 void draw()
 {
+  xrot = 0.2 * PI * (float(mouseY)/height - 0.5);
+  yrot = -0.5 * PI * float(mouseX)/width;
+  
   background(0);
   
   fill(color(170, 255, 255, 85));
@@ -775,15 +870,15 @@ void draw()
   pushMatrix();
     translate(0, 0, -30);
     scale(2);
-    rotateY(0.001 * PI * frameCount);
-    rotateX(0.1 * PI);
+    rotateY(yrot);
+    rotateX(xrot);
     
     //box(20, 50, 100);
     
     //DrawXI();
     //DrawIO();
-    DrawON();
-    //DrawNX();
+    //DrawON();
+    DrawNX();
     //DrawTest();
   popMatrix();
   
