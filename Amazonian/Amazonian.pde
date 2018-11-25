@@ -1,3 +1,6 @@
+float pert[];
+  
+
 class TP {  
   public int from;      // Which node from?
   public float ph;      // Angle of latitude from last (as measured from tree rooted vector)
@@ -14,6 +17,24 @@ class TP {
     leaf = true;
   }
   
+  TP(TP other)
+  {
+    from = other.from;
+    ph = other.ph;
+    th = other.th;
+    ll = other.ll;
+    leaf = other.leaf;
+  }
+  
+  TP Perturb()
+  {
+    TP ret = new TP(this);
+    ret.ph = ret.ph + pert[0]*PI/180;
+    ret.th = ret.th + pert[1]*PI/180;
+    ret.ll = ret.ll * (1.0 + pert[2]);
+    return ret;
+  }
+  
   TP FullCoord(TP[] a)
   {
     if (from < 0)
@@ -23,16 +44,17 @@ class TP {
     else
     {
       TP ref = a[from].FullCoord(a);
+      TP psf = Perturb();
       float rcp = cos(ref.ph);
       float rsp = sin(ref.ph);
       float rct = cos(ref.th);
       float rst = sin(ref.th);
-      float bcp = cos(ref.ph + ph);
-      float bsp = sin(ref.ph + ph);
-      float bct = cos(ref.th + th);
-      float bst = sin(ref.th + th);
+      float bcp = cos(ref.ph + psf.ph);
+      float bsp = sin(ref.ph + psf.ph);
+      float bct = cos(ref.th + psf.th);
+      float bst = sin(ref.th + psf.th);
       float rll = ref.ll;
-      float bll = ll;
+      float bll = psf.ll;
       
       // Recall that phi is measured from apex downward to horizon.
       float x = rll*rsp*rct + bll*bsp*bct;
@@ -66,8 +88,60 @@ class TP {
   }
 }
 
+
+void HSV2RGB(float[] hsv, float[] rgb)
+{
+  if (rgb == null)
+  {
+    rgb = new float[3];
+  }
+  
+  float rgbTemp[] = new float[3];
+  float hueScale = ((hsv[0] % 1.0)*6.0 + 6.0) % 6.0;
+  switch (int(hueScale) % 6)
+  {
+    case 0:
+      rgbTemp[0] = 1.0;
+      rgbTemp[1] = hueScale % 1.0;
+      rgbTemp[2] = 0.0;
+    break;
+    case 1:
+      rgbTemp[0] = 1.0 - (hueScale % 1.0);
+      rgbTemp[1] = 1.0;
+      rgbTemp[2] = 0.0;
+    break;
+    case 2:
+      rgbTemp[0] = 0.0;
+      rgbTemp[1] = 1.0;
+      rgbTemp[2] = hueScale % 1.0;
+    break;
+    case 3:
+      rgbTemp[0] = 0.0;
+      rgbTemp[1] = 1.0 - (hueScale % 1.0);
+      rgbTemp[2] = 1.0;
+    break;
+    case 4:
+      rgbTemp[0] = hueScale % 1.0;
+      rgbTemp[1] = 0.0;
+      rgbTemp[2] = 1.0;
+    break;
+    default:
+      rgbTemp[0] = 1.0;
+      rgbTemp[1] = 0.0;
+      rgbTemp[2] = 1.0 - (hueScale % 1.0);
+    break;
+  }
+  
+  rgb[0] = hsv[2] + (rgbTemp[0]-hsv[2]) * hsv[1];
+  rgb[1] = hsv[2] + (rgbTemp[1]-hsv[2]) * hsv[1];
+  rgb[2] = hsv[2] + (rgbTemp[2]-hsv[2]) * hsv[1];  
+}
+
+
 int nice[];
 int colorizer[];
+float rgbHold[];
+float hsvHold[];
 
 TP bitch[];
 int lastBitch = 0;
@@ -85,7 +159,7 @@ int pdfBud(float zo, float gp)
   //return 5;
   zo *= gp;
   
-       if (zo < 0.01) return 1;
+       if (zo < 0.10) return 1;
   else if (zo < 0.30) return 3;
   else if (zo < 0.70) return 5;
   else                return 0;
@@ -159,7 +233,16 @@ void Growth(int gen)
 }
 
 void setup()
-{
+{  
+  pert = new float[4];
+  pert[0] = 0.0;  // 0: perturbance of phi, degrees
+  pert[1] = 0.0;  // 1: perturbance of theta, degrees
+  pert[2] = 0.0;  // 2: perturbance of length, proportion of full-scale
+  pert[3] = 0.0;  // 3: perturbance of leaf color
+  
+  rgbHold = new float[3];
+  hsvHold = new float[3];
+
   // Nice.
   nice = new int[3];
   nice[0] =  69;
@@ -182,7 +265,6 @@ void setup()
   
   size(854, 480, P3D);
 }
-
 
 void DrawBitch()
 {  
@@ -223,18 +305,13 @@ void DrawBitch()
     
     if (bitch[i].leaf)
     {    
-      fill(
-        colorizer[0],
-        255,
-        colorizer[2],
-        204
-        ); 
-      stroke(
-        colorizer[0],
-        255,
-        colorizer[2],
-        204
-        ); 
+      hsvHold[0] = (float(colorizer[0])/255 + (1.5 - 2.0*pert[3]))/6;
+      hsvHold[1] = 1.0;
+      hsvHold[2] = float(colorizer[2])/255 * 0.5 + 0.5;
+      
+      HSV2RGB(hsvHold, rgbHold);
+      fill(  int(rgbHold[0]*255), int(rgbHold[1]*255), int(rgbHold[2]*255), 204); 
+      stroke(int(rgbHold[0]*255), int(rgbHold[1]*255), int(rgbHold[2]*255), 204); 
       //fill(
       //  int(255*0.0 + colorizer[0] * 0.8),
       //  int(255*0.6 + colorizer[1] * 0.4),
@@ -263,13 +340,13 @@ void DrawBitch()
       
       fill(
         colorizer[0],
-        128,
+        colorizer[1]/2,
         0,
         51
         ); 
       stroke(
         colorizer[0],
-        128,
+        colorizer[1]/2,
         0,
         51
         ); 
@@ -282,8 +359,8 @@ void DrawBitch()
         
       pushMatrix();
       translate(xc, yc-fullScale*0.5, zc);
-      rotateY(-bFrom.th-bitch[i].th);
-      rotateZ(-bFrom.ph-bitch[i].ph);
+      rotateY(-bFrom.th-bitch[i].Perturb().th);
+      rotateZ(-bFrom.ph-bitch[i].Perturb().ph);
       box(trunkThk, rdd, trunkThk);
       popMatrix();
     }
@@ -297,8 +374,8 @@ int totalSecs = 24;
 int totalRots = 3;
 float[] ccHere = new float[3];
 float[] ccFrom = new float[3];
-float treeSpeed =  2.0/float(totalSecs*FPS)*float(totalRots);
-float leafSpeed = -3.0/float(totalSecs*FPS)*float(totalRots);
+float treeSpeed = 0.0; // 2.0/float(totalSecs*FPS)*float(totalRots);
+float leafSpeed = 0.0; //-3.0/float(totalSecs*FPS)*float(totalRots);
 void draw()
 {
   colorizer[0] = 1;
@@ -309,6 +386,12 @@ void draw()
    
   ambient(153);
   lights();
+  
+  
+  pert[0] = sin(frameCount * 0.0030 * 2*PI) * 3;
+  pert[1] = sin(frameCount * 0.0020 * 2*PI) * 6;
+  pert[2] = sin(frameCount * 0.0016 * 2*PI) * 0.0;
+  pert[3] = sin(frameCount * 0.0013 * 2*PI) * 0.5 + 0.5;
    
    
    
