@@ -71,21 +71,24 @@ int colorizer[];
 
 TP bitch[];
 int lastBitch = 0;
-int maxBitch = 1000;
+int maxBitch = 300;
+int maxGen = 6;
 
 
 // The replicator and its control functions.
-float fullScale = 180.0;
-float leafSize = fullScale*0.1;
-float trunkThk = fullScale*0.02;
+float fullScale = 300.0;
+float leafSize = fullScale*0.05;
+float trunkThk = fullScale*0.01;
 
-int pdfBud(float zo)
+int pdfBud(float zo, float gp)
 {
   //return 5;
+  zo *= gp;
   
-       if (zo < 0.5) return 0;
-  else if (zo < 0.7) return 1;
-  else               return 5;
+       if (zo < 0.01) return 1;
+  else if (zo < 0.30) return 3;
+  else if (zo < 0.70) return 5;
+  else                return 0;
 }
 float pdfThe(float zo, int buds, int budIndex)
 {
@@ -93,16 +96,16 @@ float pdfThe(float zo, int buds, int budIndex)
 }
 float pdfPhi(float zo)
 {
-  //return (1.0 - zo*zo) * PI/2;
-  return PI/6;
+  return PI/18 + (zo*zo) * PI/6;
+  //return PI/6;
 }
 float pdfLen(float zo, float fullDist)
 {
-  //return (1.0 - zo*zo) * (fullScale - fullDist);
-  return 0.5 * (fullScale - fullDist);
+  return 0.3 * (0.5 + 3.0*zo*zo - 2.0*zo*zo*zo) * (fullScale - fullDist);
+  //return 0.5 * (fullScale - fullDist);
 }
 
-void Growth()
+void Growth(int gen)
 {
   int x = lastBitch;
   for (int i = 0; i < x; i++)
@@ -114,7 +117,7 @@ void Growth()
     
     if (bitch[i].leaf)
     {
-      int buds = pdfBud(parBud);
+      int buds = pdfBud(parBud, float(gen+1)/float(maxGen));
       for (int j = 0; j < buds; j++)
       {        
          bitch[lastBitch++] = new TP(
@@ -170,33 +173,19 @@ void setup()
   // Initialization of tree.
   bitch[0] = new TP(-1, 0, 0, 0);
   lastBitch = 1;
-  for (int i = 0; i < 3; i++)
+  for (int i = 0; i < maxGen; i++)
   {
     System.out.println(String.format("Growth Period %2d: Begin", i));
-    Growth();
+    Growth(i);
     System.out.println(String.format("Growth Period %2d: End", i));
   }
   
-  size(960, 960, P3D);
+  size(854, 480, P3D);
 }
 
 
-float[] ccHere = new float[3];
-float[] ccFrom = new float[3];
-void draw()
-{
-  colorizer[0] = 1;
-  colorizer[1] = 1;
-  colorizer[2] = 1;
-  
-  background(0);
-   
-  ambient(80);
-  lights();
-   
-  translate(width/2, height/2, fullScale*2.0);
-  rotateY(frameCount * 0.002 * 2*PI);
-
+void DrawBitch()
+{  
   {
     fill(
       255,
@@ -236,9 +225,15 @@ void draw()
     {    
       fill(
         colorizer[0],
-        0,
+        255,
         colorizer[2],
-        128
+        204
+        ); 
+      stroke(
+        colorizer[0],
+        255,
+        colorizer[2],
+        204
         ); 
       //fill(
       //  int(255*0.0 + colorizer[0] * 0.8),
@@ -250,6 +245,7 @@ void draw()
       translate(ccHere[0], ccHere[1]-fullScale*0.5, ccHere[2]);
       scale(sqrt(2.0/3.0), 0.5, 1.0);
       rotateZ(PI/4);
+      rotateY(frameCount * leafSpeed * 2*PI);
       box(leafSize, leafSize, leafSize);
       popMatrix();
     }
@@ -269,7 +265,13 @@ void draw()
         colorizer[0],
         128,
         0,
-        64
+        51
+        ); 
+      stroke(
+        colorizer[0],
+        128,
+        0,
+        51
         ); 
       //fill(
       //  int(255*0.2 + colorizer[0] * 0.5),
@@ -280,11 +282,64 @@ void draw()
         
       pushMatrix();
       translate(xc, yc-fullScale*0.5, zc);
-      rotateY(-bitch[i].th);
-      rotateZ(-bitch[i].ph);
+      rotateY(-bFrom.th-bitch[i].th);
+      rotateZ(-bFrom.ph-bitch[i].ph);
       box(trunkThk, rdd, trunkThk);
       popMatrix();
     }
+  }
+}
+
+
+
+int FPS = 60;
+int totalSecs = 24;
+int totalRots = 3;
+float[] ccHere = new float[3];
+float[] ccFrom = new float[3];
+float treeSpeed =  2.0/float(totalSecs*FPS)*float(totalRots);
+float leafSpeed = -3.0/float(totalSecs*FPS)*float(totalRots);
+void draw()
+{
+  colorizer[0] = 1;
+  colorizer[1] = 1;
+  colorizer[2] = 1;
+  
+  background(0);
+   
+  ambient(153);
+  lights();
+   
+   
+   
+  pushMatrix();
+  translate(width*0.2, height*0.8, -fullScale*0.4);
+  //scale(1.0, -1.0, 1.0);  // LAZY
+  rotateY( frameCount * treeSpeed * 2*PI);
+  rotateZ(PI);
+  DrawBitch();
+  popMatrix();
+  
+  pushMatrix();
+  translate(width*0.8, height*0.8, -fullScale*0.4);
+  //scale(1.0, -1.0, 1.0);  // LAZY
+  rotateY(-frameCount * treeSpeed * 2*PI);
+  rotateZ(PI);
+  DrawBitch();
+  popMatrix();
+  
+  pushMatrix();
+  translate(width*0.5, height*0.5, fullScale*0.4);
+  //scale(1.0, -1.0, 1.0);  // LAZY
+  rotateY(-frameCount * treeSpeed * 2*PI / float(totalRots));
+  rotateZ(PI);
+  DrawBitch();
+  popMatrix();
+
+  
+  if (frameCount < FPS*totalSecs)
+  {
+    // saveFrame("frames/######.png");
   }
   
   //quad(-20, -20, -20, 20, 20, 20, 20, -20);
