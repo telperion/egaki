@@ -16,6 +16,8 @@ final float bgStrength = 0.5;
 
 final float[] plDefaults = {2.0, 3.0, 6.0, 1.0};
 final float plLoop = 12.0;
+
+final float scrollSpeed = 1.0;             // squares per second 
   
 class SQ
 {
@@ -131,13 +133,15 @@ void GetTweenTime(SQ sq, float t, float[] tweenInfo)
   
 }
 
-void DrawSQ(SQ sq, float t)
+void DrawSQ(SQ sq, float t, int extra)
 {
   float tweenInfo[] = new float[2];
   GetTweenTime(sq, t, tweenInfo);
   //print(String.format("sq (x = %8.3f, y = %8.3f): phase = %2.1f, time = %8.3f\n", sq.x, sq.y, tweenInfo[0], tweenInfo[1]));
   
   float q0, q1, sz;
+  
+  float shiftX = (sw - extra*(sw+ss) + sq.x + ss*scrollSpeed*t - ss*0.5) % (sw+ss) - ss*0.5;
   
   switch(int(tweenInfo[0]))
   {
@@ -151,7 +155,7 @@ void DrawSQ(SQ sq, float t)
       sz = ss * q1 * sp;
       
       ChooseColor(sq, q1*(1.0-bgStrength) + bgStrength, q1); 
-      rect(sq.x - sz*0.5, sq.y - sz*0.5, sz, sz);
+      rect(shiftX - sz*0.5, sq.y - sz*0.5, sz, sz);
     break;
     case TSTAT_PPP:
       //print(String.format("sq (x = %8.3f, y = %8.3f): phase = PPP\n", sq.x, sq.y));
@@ -160,7 +164,7 @@ void DrawSQ(SQ sq, float t)
       sz = ss * sp;
       
       ChooseColor(sq, 1.0 - q0, 1.0); 
-      rect(sq.x - sz*0.5, sq.y - sz*0.5, sz, sz);
+      rect(shiftX - sz*0.5, sq.y - sz*0.5, sz, sz);
     break;
     case TSTAT_DAP:
       //print(String.format("sq (x = %8.3f, y = %8.3f): phase = DAP\n", sq.x, sq.y));
@@ -169,7 +173,7 @@ void DrawSQ(SQ sq, float t)
       sz = ss * (1.0 - q1 * (1.0-sp));
       
       ChooseColor(sq, (1.0-q1)*bgStrength, q1); 
-      rect(sq.x - sz*0.5, sq.y - sz*0.5, sz, sz);
+      rect(shiftX - sz*0.5, sq.y - sz*0.5, sz, sz);
     break;
     default:
       // Do nothing.
@@ -202,17 +206,22 @@ void draw()
     );
   
   
-  for (int i = 0; i < fw*fh; i++)
+  
+  for (int yy = 0; yy < fh; yy++)
   {
-    DrawSQ(bq[i], float(frameCount)/float(frameRateDesired));
+    for (int xx = 0; xx < 2*fw; xx++)
+    {
+      int index = yy*fw+(xx%fw);
+      DrawSQ(bq[index], float(frameCount)/float(frameRateDesired), xx/fw);
+    }
   }
   
   //fill(105);
   //rect(100, 200, 300, 400);
-  saveFrame("frames/extreme-######.png");
-  if (frameCount >= plLoop*frameRateDesired * 3.0)
+//  saveFrame("frames/extreme-######.png");
+  if (frameCount >= plLoop*frameRateDesired * 4.0)
   {
-    exit();
+//    exit();
   }
 }
 
