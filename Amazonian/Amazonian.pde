@@ -170,7 +170,7 @@ float pdfThe(float zo, int buds, int budIndex)
 }
 float pdfPhi(float zo)
 {
-  return PI/18 + (zo*zo) * PI/6;
+  return PI/12 + (zo*zo) * PI/12;
   //return PI/6;
 }
 float pdfLen(float zo, float fullDist)

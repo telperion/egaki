@@ -1,4 +1,4 @@
-float s = 16;
+float s = 64;
 float b = s*2;
 float a = s*0.4;//2*(1 - sqrt(0.5));
 float crossRatio = (s-a/2)/s;
@@ -1211,8 +1211,8 @@ float Sponk(float t, float tSus, float tDecl)
 
 void setup()
 {  
-  size(1024, 768, P3D);
-  ortho(-1024, 1024, -768, 768);
+  size(256, 640, P3D);
+  ortho(-256, 256, -640, 640);
   
   textSize(12);
   textAlign(CENTER, CENTER);
@@ -1223,7 +1223,7 @@ void setup()
   SetupNX();
   
   pixShader  = loadShader("XION-pix.frag");
-  pixShader.set("pixSize", 8.0);
+  pixShader.set("pixSize", 4.0);
 }
 
 void keyPressed() 
@@ -1246,9 +1246,10 @@ void draw()
   /*
   xrot = 2.1 * PI * (float(mouseY)/height - 0.5);
   yrot = -2.1 * PI * (float(mouseX)/width - 0.5);
+  tween = 0.5;
   */
   
-  float timeBase = 0.005 * frameCount;
+  float timeBase = frameCount / 180;
   tween = 0.5 + timeBase + 0.1*sin(2*PI*timeBase);
   //tween = 2 + 0.001*sin(2*PI*timeBase);
   //xrot = -0.05 * PI;
@@ -1263,7 +1264,7 @@ void draw()
   
   
   translate(width/2, height/2, 0);
-  translate(-width+64, -height+160, 0);
+  //translate(-width+64, -height+160, 0);
   
   //rect(8, 2, 12, 24);
     
@@ -1320,6 +1321,7 @@ void draw()
     }
     */
     
+    
     float tLetters[] = new float[4];
     for (int i = 0; i < 4; i++)
     {
@@ -1359,12 +1361,13 @@ void draw()
       popMatrix();
     }
     
+    
   popMatrix();
   
   // Just to simulate pixelation - can be removed.
-  //filter(pixShader);
+  filter(pixShader);
   
-  if (frameCount < 0)
+  if (frameCount < 720)
   {
     saveFrame("frames/####.png");
   }
