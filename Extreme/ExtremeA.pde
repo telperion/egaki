@@ -1,3 +1,5 @@
+/*
+
 // Static background
 final int TSTAT_NOP = 0;
 final int TSTAT_APP = 1;
@@ -182,3 +184,5 @@ void DrawSQ(SQ sq, float t, int extra)
       // Do nothing.
   }
 }
+
+*/
