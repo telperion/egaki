@@ -23,19 +23,20 @@ final int sw = 960;
 final int sh = 540;
 final int ss = 20;
 final float sp = 0.7;
-final float spt = 0.4;     // Subreaders spawn in this much time; last subreader starts to spawn at 1-spt
+final float spt = 0.2;     // Subreaders spawn in this much time; last subreader starts to spawn at 1-spt
 final float ssOverage = 1.001;  // Overdraw squares just a bit to make sure there are no spoopy gaps
 
 final int fw = sw/ss;
 final int fh = sh/ss;
 
-final float[] c0 = {0.300, 0.500, 0.400};  // HSV of lower bound color
-final float[] c1 = {0.200, 1.000, 0.700};  // HSV of upper bound color
-final float leaderCol = 0.5;               // The nearest that leaders get to the lower bound color
+final float[] c0 = {0.350, 0.300, 0.100};  // HSV of lower bound color
+final float[] c1 = {0.180, 1.000, 0.700};  // HSV of upper bound color
+final float leaderCol = 0.7;               // The nearest that leaders get to the lower bound color
+final float subreaderCol = 0.2;            // The nearest that leaders get to the upper bound color
 final float bgStrength = 0.1;
 
-final float[] plDefaults = {2.0, 0.5, 0.5, 0.25, 0.5, 0.25};
-final float plLoop = 4.0;
+final float[] plDefaults = {2.0, 0.25, 0.75, 0.25, 0.5, 1.25};
+final float plLoop = 5.0;
 
 final float scrollSpeed = 0.75;             // squares per second 
   
@@ -119,6 +120,7 @@ class SQ
   public float ccO;   // Color selection for outer square, [0, 1] (used for leaders)
   public float ccI;   // Color selection for inner square, [0, 1] (used for leaders)
   public float spOff; // Spawn offset (used for subreaders)
+  public int spLink;  // Spawn parent (used for subreaders; not needed/implemented yet)
     
   SQ()
   {
@@ -128,6 +130,7 @@ class SQ
     ccI = leaderCol + random(1 - leaderCol);
     ccO = ccI / 2;
     spOff = random(1);
+    spLink = -1;
   }
   
   SQ(float xx, float yy)
@@ -138,6 +141,7 @@ class SQ
     ccI = leaderCol + random(1 - leaderCol);
     ccO = ccI / 2;
     spOff = random(1);
+    spLink = -1;
   }
 
   // col: storage for two RGBA colors, outer and inner
@@ -154,13 +158,14 @@ class SQ
       }
       else
       {
-        hsvO[i] = c0[i];
-        hsvI[i] = c0[i];
+        hsvO[i] = c0[i]*(1.0 - ccO*subreaderCol) + c1[i]*(ccO*subreaderCol);
+        hsvI[i] = c0[i]*(1.0 - ccI*subreaderCol) + c1[i]*(ccI*subreaderCol);
       }
     }
     hsvO[3] = 0;
     hsvI[3] = 0;
-    hsvO[2] *= 0.7;
+    hsvO[2] *= 0.4;
+    hsvI[2] *= 0.4;
     
     switch (phase)
     {
@@ -241,7 +246,7 @@ class SQ
       case PHASE_LG1:
         if (type == STING_LG)
         {
-          pos[POS_Y ] = y + ss*(1-outBack(tt, 0.5));
+          pos[POS_Y ] = y; //+ ss*(1-outBack(tt, 0.5));
           pos[POS_S1] = outBack(tt, 0.5);
         }
         // Subreaders do nothing here
@@ -251,8 +256,8 @@ class SQ
         {
           float tOff = (tt - (1-spt)*spOff)/spt;
           tOff = (tOff > 1) ? 1 : (tOff < 0) ? 0 : tOff;
-          pos[POS_Y ] = y + ss*(1-outBack(tOff, 0.5));
-          pos[POS_S1] = outBack(tOff, 0.5);
+          pos[POS_Y ] = y + 10*ss*(1-outBack(tOff, 0.5));
+          pos[POS_S1] = tOff*tOff;
         }
         else
         {
@@ -285,7 +290,7 @@ class SQ
       case PHASE_OUT:
         float tOff = (tt - (1-spt)*spOff)/spt;
         tOff = (tOff > 1) ? 1 : (tOff < 0) ? 0 : tOff;
-        pos[POS_Y ] = y - ss*tOff;
+        pos[POS_Y ] = y; // + 2*ss*tOff*tOff;
         pos[POS_S1] = 1-tOff;
         pos[POS_S2] = 1-tOff;
         // Leaders do nothing here
@@ -334,6 +339,8 @@ class SQ
 SQ bq[];
 
 
+final float leaderRate = sqrt(fw*fh)/2;
+final float minLeadRate = 0.7;
 
 void Init()
 {
@@ -345,11 +352,32 @@ void Init()
     {
       int index = yy*fw+xx;
       bq[index] = new SQ((xx+0.5)*ss, (yy+0.5)*ss);
-      
-      if (index % 13 == 0)
+      bq[index].spOff = 1;
+    }
+  }
+  
+  int indLead = int(leaderRate * (minLeadRate + random(1-minLeadRate)));
+  while (indLead < fw*fh)
+  {
+    bq[indLead].type = STING_LG;
+    
+    int ri = indLead / fw;
+    int ci = indLead % fw; 
+    for (int trackback = 0; trackback < fw; trackback++)
+    {
+      float newSpawn = float(trackback)/leaderRate;
+      if (ci-trackback >= 0)
       {
-        bq[index].type = STING_LG;
+        int indRev = ri*fw + ci-trackback;
+        bq[indRev].spOff = (bq[indRev].spOff > newSpawn) ? newSpawn: bq[indRev].spOff;
+      }
+      if (ci+trackback < fw)
+      {
+        int indRev = ri*fw + ci+trackback;
+        bq[indRev].spOff = (bq[indRev].spOff > newSpawn) ? newSpawn: bq[indRev].spOff;
       }
     }
+    
+    indLead += int(leaderRate * (minLeadRate + random(1-minLeadRate)));
   }
 }

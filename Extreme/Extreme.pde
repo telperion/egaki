@@ -3,7 +3,7 @@ PGraphics pg;
 PImage bgImageA;
 PImage bgImageB;
 
-boolean saving = false;
+boolean saving = true;
 
 void setup()
 {
@@ -27,6 +27,28 @@ void draw()
   
   pg.clear();
   pg.background(0, 0, 0, 0);
+  
+  
+  // MOVE THIS OUT OF THE GRAPHICS CONTEXT EVENTUALLY
+  pg.beginShape();
+  pg.textureMode(NORMAL);
+  float ll = plLoop * frameRateDesired;
+  float currentPoint = (frameCount % (2*ll)) / (2*ll);
+  if (currentPoint > 0.3 && currentPoint < 0.8)
+  {
+    pg.texture(bgImageA);
+  }
+  else
+  {
+    pg.texture(bgImageB);
+  }
+  pg.vertex( 0,  0, 0, 0);
+  pg.vertex( 0, sh, 0, 1);
+  pg.vertex(sw, sh, 1, 1);
+  pg.vertex(sw,  0, 1, 0);
+  pg.endShape();
+  // MOVE THIS OUT OF THE GRAPHICS CONTEXT EVENTUALLY
+  
   
   float[] hsv = new float[3];
   float[] rgb = new float[3];
@@ -56,23 +78,6 @@ void draw()
     int(255*rgb[2])
     );
   */
-  beginShape();
-  textureMode(NORMAL);
-  float ll = plLoop * frameRateDesired;
-  float currentPoint = (frameCount % (2*ll)) / (2*ll);
-  if (currentPoint > 0.4 && currentPoint < 0.9)
-  {
-    texture(bgImageA);
-  }
-  else
-  {
-    texture(bgImageB);
-  }
-  vertex( 0,  0, 0, 0);
-  vertex( 0, sh, 0, 1);
-  vertex(sw, sh, 1, 1);
-  vertex(sw,  0, 1, 0);
-  endShape();
     
   image(pg, 0, 0);
   
@@ -81,8 +86,8 @@ void draw()
   
   if (saving)
   {
-    pg.save(String.format("frames/%06d.png", frameCount));
-    if (frameCount >= plLoop*frameRateDesired * 3.0)
+    pg.save(String.format("stinger-20190128/%06d.png", frameCount));
+    if (frameCount >= ll * 3.0)
     {
       exit();
     }
