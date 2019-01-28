@@ -1,6 +1,7 @@
 PGraphics pg;
 
-PImage bgImage;
+PImage bgImageA;
+PImage bgImageB;
 
 boolean saving = false;
 
@@ -14,8 +15,10 @@ void setup()
   
   pg = createGraphics(960, 540, P3D);
   
-  bgImage = loadImage("bg.png");
+  bgImageA = loadImage("bgA.png");
+  bgImageB = loadImage("bgB.png");
 }
+
 
 
 void draw()
@@ -54,8 +57,17 @@ void draw()
     );
   */
   beginShape();
-  textureMode(NORMAL);  
-  texture(bgImage);  
+  textureMode(NORMAL);
+  float ll = plLoop * frameRateDesired;
+  float currentPoint = (frameCount % (2*ll)) / (2*ll);
+  if (currentPoint > 0.4 && currentPoint < 0.9)
+  {
+    texture(bgImageA);
+  }
+  else
+  {
+    texture(bgImageB);
+  }
   vertex( 0,  0, 0, 0);
   vertex( 0, sh, 0, 1);
   vertex(sw, sh, 1, 1);

@@ -34,8 +34,8 @@ final float[] c1 = {0.200, 1.000, 0.700};  // HSV of upper bound color
 final float leaderCol = 0.5;               // The nearest that leaders get to the lower bound color
 final float bgStrength = 0.1;
 
-final float[] plDefaults = {2.0, 2.0, 3.0, 4.0, 2.0, 2.0};
-final float plLoop = 12.0;
+final float[] plDefaults = {2.0, 0.5, 0.5, 0.25, 0.5, 0.25};
+final float plLoop = 4.0;
 
 final float scrollSpeed = 0.75;             // squares per second 
   
@@ -242,7 +242,7 @@ class SQ
         if (type == STING_LG)
         {
           pos[POS_Y ] = y + ss*(1-outBack(tt, 0.5));
-          pos[POS_S1] = tt*(2-tt);
+          pos[POS_S1] = outBack(tt, 0.5);
         }
         // Subreaders do nothing here
       break;
@@ -252,7 +252,7 @@ class SQ
           float tOff = (tt - (1-spt)*spOff)/spt;
           tOff = (tOff > 1) ? 1 : (tOff < 0) ? 0 : tOff;
           pos[POS_Y ] = y + ss*(1-outBack(tOff, 0.5));
-          pos[POS_S1] = tOff*(2-tOff);
+          pos[POS_S1] = outBack(tOff, 0.5);
         }
         else
         {
