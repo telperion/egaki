@@ -3,6 +3,8 @@ PGraphics pg;
 PImage bgImageA;
 PImage bgImageB;
 
+PImage logos[];
+
 boolean saving = true;
 
 void setup()
@@ -17,8 +19,12 @@ void setup()
   
   bgImageA = loadImage("bgA.png");
   bgImageB = loadImage("bgB.png");
+  
+  logos = new PImage[3];
+  logos[0] = loadImage("G6-logo.png");
+  logos[1] = loadImage("sfe-logo.png");
+  logos[2] = loadImage("fst-logo.png");
 }
-
 
 
 void draw()
@@ -63,6 +69,40 @@ void draw()
     }
   }
   
+  float logoDropOffset = 0.2;
+  float logoDropTime = plLoop - logoDropOffset*2;
+  float t = (float(frameCount)/float(frameRateDesired)) % plLoop;
+  float tt = (t-0.1) / (2.5-0.1);
+  tt = (tt > 1) ? 1 : ((tt < 0) ? 0 : tt);
+  
+  float logoApothem  = sh * 0.15;
+  float rotateCenter = (tt-0.5) * PI/12;
+  float rotateInward = 4*(1-tt)*tt * PI/6;
+  float distToCenter = sh * 0.25 * (0.7 + 1.2*(1-tt)*tt);
+  float centerDisplc = turnabout(tt, 0.2) * (sh + distToCenter + logoApothem) * 0.6 + sh*0.03;
+  
+  pg.noStroke();
+  for (int i = 0; i < 3; i++)
+  {
+    pg.pushMatrix();
+      pg.translate(sw/2, sh/2 + centerDisplc, distToCenter * 0.2);
+      pg.rotateX(PI/24);
+      pg.rotateZ(2*PI/3*i + rotateCenter - PI/2);
+      pg.rotateY(-rotateInward);
+      pg.translate(distToCenter, 0);
+      pg.rotateZ(-(2+(i+1)%3)*PI/2);
+          
+      pg.beginShape();
+      pg.textureMode(NORMAL);
+      pg.texture(logos[i]);
+      pg.vertex(-logoApothem, -logoApothem, 0, 0);
+      pg.vertex(-logoApothem,  logoApothem, 0, 1);
+      pg.vertex( logoApothem,  logoApothem, 1, 1);
+      pg.vertex( logoApothem, -logoApothem, 1, 0);
+      pg.endShape();
+    pg.popMatrix();
+  }
+  
   pg.endDraw();
   
   
@@ -86,8 +126,8 @@ void draw()
   
   if (saving)
   {
-    pg.save(String.format("stinger-20190128/%06d.png", frameCount));
-    if (frameCount >= ll * 3.0)
+    pg.save(String.format("stinger-20190129/%06d.png", frameCount));
+    if (frameCount >= ll * 2.0)
     {
       exit();
     }

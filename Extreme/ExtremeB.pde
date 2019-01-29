@@ -4,12 +4,11 @@ final int STING_SM = 0;   // Indicates subreaders
 final int STING_LG = 1;   // Indicates leaders
 
 final int PHASE_NOP = 0;  // Nothing is happening
-final int PHASE_LG1 = 1;  // Leaders appearing
-final int PHASE_SM1 = 2;  // Subreaders appearing
-final int PHASE_LG2 = 3;  // Leaders filling 
-final int PHASE_SM2 = 4;  // Subreaders filling, leaders clearing
-final int PHASE_OUT = 5;  // Subreaders clearing
-final int PHASE_MAX = 6;
+final int PHASE_LAP = 1;  // Leaders appearing
+final int PHASE_SRP = 2;  // Leaders filling, Subreaders appearing
+final int PHASE_SFC = 3;  // Subreaders filling, leaders clearing
+final int PHASE_OUT = 4;  // Subreaders clearing
+final int PHASE_MAX = 5;
 
 final int POS_X   = 0;
 final int POS_Y   = 1;
@@ -23,7 +22,7 @@ final int sw = 960;
 final int sh = 540;
 final int ss = 20;
 final float sp = 0.7;
-final float spt = 0.2;     // Subreaders spawn in this much time; last subreader starts to spawn at 1-spt
+final float spt = 0.15;     // Subreaders spawn in this much time; last subreader starts to spawn at 1-spt
 final float ssOverage = 1.001;  // Overdraw squares just a bit to make sure there are no spoopy gaps
 
 final int fw = sw/ss;
@@ -31,12 +30,12 @@ final int fh = sh/ss;
 
 final float[] c0 = {0.350, 0.300, 0.100};  // HSV of lower bound color
 final float[] c1 = {0.180, 1.000, 0.700};  // HSV of upper bound color
-final float leaderCol = 0.7;               // The nearest that leaders get to the lower bound color
-final float subreaderCol = 0.2;            // The nearest that leaders get to the upper bound color
+final float leaderCol = 0.3;               // The nearest that leaders get to the lower bound color
+final float subreaderCol = 0.7;            // The nearest that leaders get to the upper bound color
 final float bgStrength = 0.1;
 
-final float[] plDefaults = {2.0, 0.25, 0.75, 0.25, 0.5, 1.25};
-final float plLoop = 5.0;
+final float[] plDefaults = {0.0, 0.3, 1.1, 0.7, 1.4};
+final float plLoop = 3.5;
 
 final float scrollSpeed = 0.75;             // squares per second 
   
@@ -164,31 +163,29 @@ class SQ
     }
     hsvO[3] = 0;
     hsvI[3] = 0;
-    hsvO[2] *= 0.4;
-    hsvI[2] *= 0.4;
+    if (type == STING_SM)
+    {
+      hsvO[1] *= 0.5;
+      hsvO[2] *= 0.5;
+      hsvI[1] *= 1.0;
+      hsvI[2] *= 0.7;
+    }
+        
+    float tOff = (tt - (1-spt)*spOff)/spt;
+    tOff = (tOff > 1) ? 1 : (tOff < 0) ? 0 : tOff;
     
     switch (phase)
     {
       case PHASE_NOP:
         // Do nothing.
       break;
-      case PHASE_LG1:
+      case PHASE_LAP:
         if (type == STING_LG)
         {
           hsvO[3] = tt;
         }
       break;
-      case PHASE_SM1:
-        if (type == STING_SM)
-        {
-          hsvO[3] = tt;
-        }
-        else
-        {
-          hsvO[3] = 1;
-        }
-      break;
-      case PHASE_LG2:
+      case PHASE_SRP:
         if (type == STING_LG)
         {
           hsvO[3] = 1;
@@ -196,10 +193,10 @@ class SQ
         }
         else
         {
-          hsvO[3] = 1;
+          hsvO[3] = tOff;
         }
       break;
-      case PHASE_SM2:
+      case PHASE_SFC:
         if (type == STING_SM)
         {
           hsvO[3] = 1;
@@ -238,12 +235,17 @@ class SQ
     pos[POS_S2] = 0;
     pos[POS_RZ] = 0;
         
+    float tOff = (tt - (1-spt)*spOff)/spt;
+    tOff = (tOff > 1) ? 1 : (tOff < 0) ? 0 : tOff;
+    float tOff2 = (tt - (1-spt*2)*spOff)/(spt*2);
+    tOff2 = (tOff2 > 1) ? 1 : (tOff2 < 0) ? 0 : tOff2;
+          
     switch (phase)
     {
       case PHASE_NOP:
         // Do nothing.
       break;
-      case PHASE_LG1:
+      case PHASE_LAP:
         if (type == STING_LG)
         {
           pos[POS_Y ] = y; //+ ss*(1-outBack(tt, 0.5));
@@ -251,35 +253,23 @@ class SQ
         }
         // Subreaders do nothing here
       break;
-      case PHASE_SM1:
-        if (type == STING_SM)
-        {
-          float tOff = (tt - (1-spt)*spOff)/spt;
-          tOff = (tOff > 1) ? 1 : (tOff < 0) ? 0 : tOff;
-          pos[POS_Y ] = y + 10*ss*(1-outBack(tOff, 0.5));
-          pos[POS_S1] = tOff*tOff;
-        }
-        else
-        {
-          pos[POS_S1] = 1;
-        }
-      break;
-      case PHASE_LG2:
+      case PHASE_SRP:
         if (type == STING_LG)
         {
           pos[POS_S1] = 1;
-          pos[POS_S2] = tt*(2-tt);
+          pos[POS_S2] = tt*tt;
         }
         else
         {
-          pos[POS_S1] = 1;
+          pos[POS_Y ] = y - 2*ss*(1-outBack(tOff2, 0.7));
+          pos[POS_S1] = tOff*(2-tOff);
         }
       break;
-      case PHASE_SM2:
+      case PHASE_SFC:
         if (type == STING_SM)
         {
           pos[POS_S1] = 1;
-          pos[POS_S2] = tt*(2-tt);
+          pos[POS_S2] = tOff*tOff;
         }
         else
         {
@@ -288,11 +278,9 @@ class SQ
         }
       break;
       case PHASE_OUT:
-        float tOff = (tt - (1-spt)*spOff)/spt;
-        tOff = (tOff > 1) ? 1 : (tOff < 0) ? 0 : tOff;
-        pos[POS_Y ] = y; // + 2*ss*tOff*tOff;
-        pos[POS_S1] = 1-tOff;
-        pos[POS_S2] = 1-tOff;
+        pos[POS_Y ] = y + 2*ss*(1-outBack(1-tOff2, 0.7));
+        pos[POS_S1] = (tOff-1)*(tOff-1);
+        pos[POS_S2] = (tOff-1)*(tOff-1);
         // Leaders do nothing here
       break;
     }
@@ -340,7 +328,7 @@ SQ bq[];
 
 
 final float leaderRate = sqrt(fw*fh)/2;
-final float minLeadRate = 0.7;
+final float minLeadRate = 0.3;
 
 void Init()
 {
