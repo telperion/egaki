@@ -29,6 +29,9 @@ void setup()
 
 void draw()
 {
+  float ll = plLoop * frameRateDesired;
+  float currentPoint = (frameCount % (2*ll)) / (2*ll);
+  
   pg.beginDraw();
   
   pg.clear();
@@ -36,10 +39,9 @@ void draw()
   
   
   // MOVE THIS OUT OF THE GRAPHICS CONTEXT EVENTUALLY
+  /*
   pg.beginShape();
   pg.textureMode(NORMAL);
-  float ll = plLoop * frameRateDesired;
-  float currentPoint = (frameCount % (2*ll)) / (2*ll);
   if (currentPoint > 0.3 && currentPoint < 0.8)
   {
     pg.texture(bgImageA);
@@ -53,6 +55,7 @@ void draw()
   pg.vertex(sw, sh, 1, 1);
   pg.vertex(sw,  0, 1, 0);
   pg.endShape();
+  */
   // MOVE THIS OUT OF THE GRAPHICS CONTEXT EVENTUALLY
   
   
@@ -79,7 +82,7 @@ void draw()
   float rotateCenter = (tt-0.5) * PI/12;
   float rotateInward = 4*(1-tt)*tt * PI/6;
   float distToCenter = sh * 0.25 * (0.7 + 1.2*(1-tt)*tt);
-  float centerDisplc = turnabout(tt, 0.2) * (sh + distToCenter + logoApothem) * 0.6 + sh*0.03;
+  float centerDisplc = turnabout(tt, 0.15) * (sh + distToCenter + logoApothem) * 0.6 + sh*0.08;
   
   pg.noStroke();
   for (int i = 0; i < 3; i++)
@@ -126,8 +129,8 @@ void draw()
   
   if (saving)
   {
-    pg.save(String.format("stinger-20190129/%06d.png", frameCount));
-    if (frameCount >= ll * 2.0)
+    pg.save(String.format("stinger-G6/%06d.png", frameCount));
+    if (frameCount >= ll + 1)
     {
       exit();
     }

@@ -21,21 +21,21 @@ final int frameRateDesired = 60;
 final int sw = 960;
 final int sh = 540;
 final int ss = 20;
-final float sp = 0.7;
-final float spt = 0.15;     // Subreaders spawn in this much time; last subreader starts to spawn at 1-spt
+final float sp = 0.7;      // max size of square fill
+final float spt = 0.15;    // Subreaders spawn in this much time; last subreader starts to spawn at 1-spt
 final float ssOverage = 1.001;  // Overdraw squares just a bit to make sure there are no spoopy gaps
 
 final int fw = sw/ss;
 final int fh = sh/ss;
 
-final float[] c0 = {0.350, 0.300, 0.100};  // HSV of lower bound color
-final float[] c1 = {0.180, 1.000, 0.700};  // HSV of upper bound color
+final float[] c0 = {0.300, 0.700, 0.000};  // HSV of lower bound color
+final float[] c1 = {0.200, 1.000, 0.600};  // HSV of upper bound color
 final float leaderCol = 0.3;               // The nearest that leaders get to the lower bound color
 final float subreaderCol = 0.7;            // The nearest that leaders get to the upper bound color
 final float bgStrength = 0.1;
 
-final float[] plDefaults = {0.0, 0.3, 1.1, 0.7, 1.4};
-final float plLoop = 3.5;
+final float[] plDefaults = {0.0, 0.3, 1.0, 0.7, 1.0};
+final float plLoop = 3.0;
 
 final float scrollSpeed = 0.75;             // squares per second 
   
@@ -166,9 +166,9 @@ class SQ
     if (type == STING_SM)
     {
       hsvO[1] *= 0.5;
-      hsvO[2] *= 0.5;
-      hsvI[1] *= 1.0;
-      hsvI[2] *= 0.7;
+      hsvO[2] *= 0.3;
+      hsvI[1] *= 0.7;
+      hsvI[2] *= 0.5;
     }
         
     float tOff = (tt - (1-spt)*spOff)/spt;
@@ -204,20 +204,20 @@ class SQ
         }
         else
         {
-          hsvO[3] = 1-tt*0.5;
-          hsvI[3] = 1-tt*0.5;
+          hsvO[3] = 1;//-tt*0.5;
+          hsvI[3] = 1;//-tt*0.5;
         }
       break;
       case PHASE_OUT:
         if (type == STING_SM)
         {
-          hsvO[3] = 1-tt;
-          hsvI[3] = 1-tt;
+          hsvO[3] = 1-tOff;
+          hsvI[3] = 1-tOff;
         }
         else
         {
-          hsvO[3] = 0.5*(1-tt);
-          hsvI[3] = 0.5*(1-tt);
+          hsvO[3] = 1*(1-tt);
+          hsvI[3] = 1*(1-tt);
         }
       break;
     }
@@ -235,10 +235,12 @@ class SQ
     pos[POS_S2] = 0;
     pos[POS_RZ] = 0;
         
-    float tOff = (tt - (1-spt)*spOff)/spt;
+    float sp4 = spOff;
+    float tOff = (tt - (1-spt)*sp4)/spt;
     tOff = (tOff > 1) ? 1 : (tOff < 0) ? 0 : tOff;
-    float tOff2 = (tt - (1-spt*2)*spOff)/(spt*2);
+    float tOff2 = (tt - (1-spt*2)*sp4)/(spt*2);
     tOff2 = (tOff2 > 1) ? 1 : (tOff2 < 0) ? 0 : tOff2;
+    float spOff2 = (1-spOff)*(1-spOff);
           
     switch (phase)
     {
@@ -269,7 +271,7 @@ class SQ
         if (type == STING_SM)
         {
           pos[POS_S1] = 1;
-          pos[POS_S2] = tOff*tOff;
+          pos[POS_S2] = spOff2*tOff*tOff;
         }
         else
         {
@@ -278,9 +280,17 @@ class SQ
         }
       break;
       case PHASE_OUT:
-        pos[POS_Y ] = y + 2*ss*(1-outBack(1-tOff2, 0.7));
-        pos[POS_S1] = (tOff-1)*(tOff-1);
-        pos[POS_S2] = (tOff-1)*(tOff-1);
+        if (type == STING_SM)
+        {
+          pos[POS_Y ] = y + 2*ss*(1-outBack(1-tOff2, 0.7));
+          pos[POS_S1] = (tOff-1)*(tOff-1);
+          pos[POS_S2] = spOff2*(tOff-1)*(tOff-1);
+        }
+        else
+        {
+          pos[POS_S1] = (tt-1)*(tt-1);
+          pos[POS_S2] = (tt-1)*(tt-1);
+        }
         // Leaders do nothing here
       break;
     }
@@ -314,6 +324,7 @@ class SQ
     HSV2RGB(hsvO, col);
     col[3] = hsvO[3];
     SetColor(pg, col);
+    pg.noStroke();
     pg.rect(pos[POS_X] - szO*0.5, pos[POS_Y] - szO*0.5, szO, szO);
     
     HSV2RGB(hsvI, col);
@@ -328,7 +339,7 @@ SQ bq[];
 
 
 final float leaderRate = sqrt(fw*fh)/2;
-final float minLeadRate = 0.3;
+final float minLeadRate = 0.5;
 
 void Init()
 {
