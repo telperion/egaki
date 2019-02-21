@@ -5,7 +5,7 @@ PImage bgImageB;
 
 PImage logos[];
 
-boolean saving = false;
+boolean saving = true;
 float frameRateDesired = 60;
 float frameLoopLength  = 15;    // seconds
 
@@ -32,10 +32,10 @@ void Init()
 void setup()
 {  
   frameRate(frameRateDesired);
-  size(1280, 720, P3D);
+  size(960, 540, P3D);
   //smooth(8);
   
-  pg = createGraphics(1280, 720, P3D);
+  pg = createGraphics(960, 540, P3D);
   
   Init();
 }

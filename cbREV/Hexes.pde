@@ -19,16 +19,16 @@ class Hex
 
 class Rule
 {
-  float[] hsvA  = {0.70, 1.00, 0.05};
+  float[] hsvA  = {0.75, 1.00, 0.05};
   float[] hsvB1 = {0.80, 0.80, 0.70};
   float[] hsvB2 = {0.60, 0.50, 0.60};
   
   float[] hsvPick;
   float[] hsvTell;
   
-  float sw = 1280;
-  float sh = 720;
-  float ss = 60;    // radius (not apothem)
+  float sw = 960;
+  float sh = 540;
+  float ss = 20;    // radius (not apothem)
   
   float zFwd = 0.1;
   
@@ -41,7 +41,7 @@ class Rule
   
   int countHorz()
   {
-    return ceil(sw/(1.5*ss));
+    return ceil(sw/(1.5*ss)) + 1;
   }  
   int countVert()
   {
@@ -73,13 +73,13 @@ class Rule
   float OuterRadius(Hex info, float t)
   {
     t = (t + info.tweenOffset) % 1.0;
-    return ss * (0.5 + 0.4 * 4.0*t*(1-t));
+    return ss * (0.5 + 0.5 * 4.0*t*(1-t));
   }
   
   float ColorTweener(float t)
   {
-    float a = 19;     // should be 3 (mod 4) b/c sinusoid period reasons
-    float b = 60; //20;     // higher numbers scrunch the flickers
+    float a = 15;     // should be 3 (mod 4) b/c sinusoid period reasons
+    float b = 80; //20;     // higher numbers scrunch the flickers
     float c = 0.754;  // move flickers earlier/later
                       // these values have been fine-tuned in desmos to approach (1, 0)
     
