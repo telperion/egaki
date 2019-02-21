@@ -51,6 +51,10 @@ void draw()
   pg.clear();
   pg.background(0, 0, 0, 255);
     
+    
+  float[] hsv = new float[3];
+  float[] rgb = new float[3];
+    
   int fw = ruler.countHorz();
   int fh = ruler.countVert();
   for (int j = 0; j < fh; j++)
@@ -58,6 +62,20 @@ void draw()
     for (int i = 0; i < fw; i++)
     {
       ruler.Draw(pg, field[j*fw+i], t);
+      
+      /*
+      hsv[0] = float(i)/fw;
+      hsv[1] = float(j)/fh;
+      hsv[2] = t % 1.0;
+      HSV2RGB(hsv, rgb);
+      rgbFill(pg, rgb);
+      pg.rect(
+        (i+0)*(1280.0/fw),
+        (j+0)*( 720.0/fh),
+        (1280.0/fw),
+        ( 720.0/fh)
+      );
+      */
     }
   }
   

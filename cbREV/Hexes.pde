@@ -19,18 +19,18 @@ class Hex
 
 class Rule
 {
-  float[] hsvA  = {0.67, 0.60, 0.00};
-  float[] hsvB1 = {0.78, 0.72, 0.86};
-  float[] hsvB2 = {0.60, 0.50, 0.50};
+  float[] hsvA  = {0.70, 1.00, 0.05};
+  float[] hsvB1 = {0.80, 0.80, 0.70};
+  float[] hsvB2 = {0.60, 0.50, 0.60};
   
   float[] hsvPick;
   float[] hsvTell;
   
   float sw = 1280;
   float sh = 720;
-  float ss = 30;    // radius (not apothem)
+  float ss = 60;    // radius (not apothem)
   
-  float zFwd = 0.2;
+  float zFwd = 0.1;
   
   Rule()
   {
@@ -68,24 +68,24 @@ class Rule
   float InnerRadius(Hex info, float t)
   {
     t = (t + info.tweenOffset) % 1.0;
-    return ss * (0.2 + 0.5 * 4.0*t*(1-t));
+    return ss * (0.2 + 0.6 * 4.0*t*(1-t));
   }
   float OuterRadius(Hex info, float t)
   {
     t = (t + info.tweenOffset) % 1.0;
-    return ss * (0.7 + 0.2 * 4.0*t*(1-t));
+    return ss * (0.5 + 0.4 * 4.0*t*(1-t));
   }
   
   float ColorTweener(float t)
   {
     float a = 19;     // should be 3 (mod 4) b/c sinusoid period reasons
-    float b = 80; //20;     // higher numbers scrunch the flickers
+    float b = 60; //20;     // higher numbers scrunch the flickers
     float c = 0.754;  // move flickers earlier/later
                       // these values have been fine-tuned in desmos to approach (1, 0)
     
     float f = atan(exp(b * (t - c)));
     float g = (1 + sin(a * f))/2;
-    float h = 4 * t * (1 - t);
+    float h = t*(2-t);//4 * t * (1 - t);
     float j = t;
     
     return j * g + (1 - j) * h;    
@@ -116,16 +116,16 @@ class Rule
     if (ringIndex == 0)
     {
       // Outer only
-      hsvTell[2] *= 0.5;
+      hsvTell[2] *= 0.9;
     }
     
-    if (segIndex == 2)
+    if (segIndex == 3)
     {
-      hsvTell[0] -= 0.05;
+      hsvTell[0] -= 0.01;
     }
-    else if (segIndex == 3)
+    else if (segIndex == 2)
     {
-      hsvTell[0] += 0.05;
+      hsvTell[0] += 0.01;
     }
     
     HSV2RGB(hsvTell, rgb);
@@ -149,15 +149,14 @@ class Rule
       
       Color(rgb, info, t, 0, 0);  rgbFill(pg, rgb);
       
-      pg.beginShape(TRIANGLE_FAN);      
-      Color(rgb, info, t, 0, 0);  rgbFill(pg, rgb);  pg.vertex( 0,              0,   0);
-      Color(rgb, info, t, 0, 0);  rgbFill(pg, rgb);  pg.vertex( 1.0,            0,   0);
-      Color(rgb, info, t, 0, 1);  rgbFill(pg, rgb);  pg.vertex( 0.5,  sqrt(3) * 0.5, 0);
-      Color(rgb, info, t, 0, 2);  rgbFill(pg, rgb);  pg.vertex(-0.5,  sqrt(3) * 0.5, 0);
-      Color(rgb, info, t, 0, 3);  rgbFill(pg, rgb);  pg.vertex(-1.0,            0,   0);
-      Color(rgb, info, t, 0, 4);  rgbFill(pg, rgb);  pg.vertex(-0.5, -sqrt(3) * 0.5, 0);
-      Color(rgb, info, t, 0, 5);  rgbFill(pg, rgb);  pg.vertex( 0.5, -sqrt(3) * 0.5, 0);
-      Color(rgb, info, t, 0, 0);  rgbFill(pg, rgb);  pg.vertex( 1.0,            0,   0);
+      pg.beginShape(TRIANGLES);
+      for (int i = 0; i < 6; i++)
+      {
+        Color(rgb, info, t, 0, i);  rgbFill(pg, rgb);
+        pg.vertex(               0,                     0,       0);
+        pg.vertex( cos(TWO_PI* i   /6.0), sin(TWO_PI* i   /6.0), 0);
+        pg.vertex( cos(TWO_PI*(i+1)/6.0), sin(TWO_PI*(i+1)/6.0), 0);
+      }
       pg.endShape();
     pg.popMatrix();
     
@@ -169,15 +168,14 @@ class Rule
       Color(rgb, info, t, 1, 0);
       pg.fill(int(rgb[0]*255), int(rgb[1]*255), int(rgb[2]*255));
       
-      pg.beginShape(TRIANGLE_FAN);
-      Color(rgb, info, t, 1, 0);  rgbFill(pg, rgb);  pg.vertex( 0,              0,   zFwd);
-      Color(rgb, info, t, 1, 0);  rgbFill(pg, rgb);  pg.vertex( 1.0,            0,   zFwd);
-      Color(rgb, info, t, 1, 1);  rgbFill(pg, rgb);  pg.vertex( 0.5,  sqrt(3) * 0.5, zFwd);
-      Color(rgb, info, t, 1, 2);  rgbFill(pg, rgb);  pg.vertex(-0.5,  sqrt(3) * 0.5, zFwd);
-      Color(rgb, info, t, 1, 3);  rgbFill(pg, rgb);  pg.vertex(-1.0,            0,   zFwd);
-      Color(rgb, info, t, 1, 4);  rgbFill(pg, rgb);  pg.vertex(-0.5, -sqrt(3) * 0.5, zFwd);
-      Color(rgb, info, t, 1, 5);  rgbFill(pg, rgb);  pg.vertex( 0.5, -sqrt(3) * 0.5, zFwd);
-      Color(rgb, info, t, 1, 0);  rgbFill(pg, rgb);  pg.vertex( 1.0,            0,   zFwd);
+      pg.beginShape(TRIANGLES);
+      for (int i = 0; i < 6; i++)
+      {
+        Color(rgb, info, t, 1, i);  rgbFill(pg, rgb);
+        pg.vertex(               0,                     0,       zFwd);
+        pg.vertex( cos(TWO_PI* i   /6.0), sin(TWO_PI* i   /6.0), zFwd);
+        pg.vertex( cos(TWO_PI*(i+1)/6.0), sin(TWO_PI*(i+1)/6.0), zFwd);
+      }
       pg.endShape();
     pg.popMatrix();
     

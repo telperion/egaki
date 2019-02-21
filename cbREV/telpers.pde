@@ -41,6 +41,19 @@ void HSV2RGB(float[] hsv, float[] rgb)
     break;
   }
   
+  if (hsv[2] < 0.5)
+  {
+    rgbTemp[0] *= hsv[2] * 2.0;
+    rgbTemp[1] *= hsv[2] * 2.0;
+    rgbTemp[2] *= hsv[2] * 2.0;
+  }
+  else
+  {
+    rgbTemp[0] = 1.0 - (1.0 - rgbTemp[0]) * (1.0 - hsv[2]) * 2.0;
+    rgbTemp[1] = 1.0 - (1.0 - rgbTemp[1]) * (1.0 - hsv[2]) * 2.0;
+    rgbTemp[2] = 1.0 - (1.0 - rgbTemp[2]) * (1.0 - hsv[2]) * 2.0;
+  }
+  
   rgb[0] = hsv[2] + (rgbTemp[0]-hsv[2]) * hsv[1];
   rgb[1] = hsv[2] + (rgbTemp[1]-hsv[2]) * hsv[1];
   rgb[2] = hsv[2] + (rgbTemp[2]-hsv[2]) * hsv[1];  
