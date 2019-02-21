@@ -123,7 +123,7 @@ class Rule
     {
       hsvTell[0] -= 0.01;
     }
-    else if (segIndex == 2)
+    else if (segIndex == 1)
     {
       hsvTell[0] += 0.01;
     }
