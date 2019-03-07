@@ -26,8 +26,8 @@ class Rule
   float[] hsvPick;
   float[] hsvTell;
   
-  float sw = 960;
-  float sh = 540;
+  float sw = 1280;
+  float sh = 720;
   float ss = 20;    // radius (not apothem)
   
   float zFwd = 0.1;

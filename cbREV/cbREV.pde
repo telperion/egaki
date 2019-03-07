@@ -1,9 +1,8 @@
 PGraphics pg;
 
-PImage bgImageA;
-PImage bgImageB;
-
-PImage logos[];
+PImage warpImageA;
+PImage warpImageB;
+PShader warpShader;
 
 boolean saving = true;
 float frameRateDesired = 60;
@@ -32,10 +31,16 @@ void Init()
 void setup()
 {  
   frameRate(frameRateDesired);
-  size(960, 540, P3D);
+  size(1280, 720, P3D);
   //smooth(8);
+    
+  warpImageA = loadImage("pickwarp-A2.jpg");
+  warpImageB = loadImage("pickwarp-B.jpg");
   
-  pg = createGraphics(960, 540, P3D);
+  warpShader = loadShader("fishwarp.glsl");
+  warpShader.set("warpTex", warpImageA);
+  
+  pg = createGraphics(1280, 720, P3D);
   
   Init();
 }
@@ -80,6 +85,8 @@ void draw()
   }
   
   //pg.rect(100, 100, 300, 500);
+  warpShader.set("time", t);
+  pg.filter(warpShader);
   
   pg.endDraw();
   
