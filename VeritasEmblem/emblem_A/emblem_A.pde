@@ -1,13 +1,13 @@
 PShape emblem;
-int FP1 = int( 60 * sqrt( 7));
-int FP2 = int( 60 * sqrt( 2));
-int FP3 = int( 60 * sqrt( 3));
-int FP4 = int( 60 * sqrt( 5));
-int FP5 = int(120 * sqrt( 1));
-int FPGCD = 120+1;
+int FP1 = int(240 * sqrt( 7));
+int FP2 = int(240 * sqrt( 2));
+int FP3 = int(240 * sqrt( 3));
+int FP4 = int(240 * sqrt( 5));
+int FP5 = int(480 * sqrt( 1));
+int FPGCD = 480+1;
 
-int sortPass = 32;
-int decimate = 4; 
+int sortPass = 1;
+int decimate = 1; 
 
 PShader colorShader; 
 PShader sortShader;
@@ -166,10 +166,11 @@ void draw()
   //sortShader.set("jumpSize",  frameCount % sortPass  + 0); 
   sortShader.set("jumpSize", (sortPass - (frameCount % sortPass)) / decimate + (decimate - frameCount % decimate));
   sortShader.set("oddLines", (frameCount % sortPass) % 2);
-  filter(sortShader);
+  //filter(sortShader);
   
   //saveFrame("frames/######.png");
   
+  /*
   if (frameCount % sortPass == 4*decimate)
   {
     saveFrame("frames/######.png");
@@ -179,4 +180,5 @@ void draw()
   {
     exit();
   }
+  */
 }
