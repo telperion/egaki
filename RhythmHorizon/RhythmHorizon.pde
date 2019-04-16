@@ -29,7 +29,7 @@ void setup()
   horizonShader = loadShader("assets/horizonA.glsl");
   horizonShader.set("horizon_src_tex", horizonSourceA);
   horizonShader.set("resolution", 1280, 720);
-  horizonShader.set("lightener", 0.1);
+  horizonShader.set("lightener", 0.07);
   
   pg = createGraphics(1280, 720, P3D);
   
@@ -99,7 +99,7 @@ void draw()
   pg.strokeJoin(ROUND);
   pg.strokeCap(ROUND);
   
-  pg.stroke(85);
+  pg.stroke(127);
   DrawHexInternals(pg);
   pg.stroke(255);
   DrawHexSpurs(pg);
