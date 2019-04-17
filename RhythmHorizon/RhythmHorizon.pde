@@ -1,15 +1,17 @@
 PGraphics pg;
 
 PImage horizonSourceA;
+PImage horizonSourceFG1;
+PImage horizonSourceFG2;
 PShader horizonShader;
 
 boolean saving = false;
 float frameRateDesired = 60;
-float frameLoopLength  = 15;    // seconds
+float frameLoopLength  = 30;    // seconds
 
 float hex_center_x = 0.0;
 float hex_center_y = 0.0;
-float hex_radius = 128.0;
+float hex_radius = 90.0;
 float hex_apothem = 0.5*sqrt(3.0)*hex_radius;
 float hex_minipothem = hex_radius/sqrt(3.0);
 
@@ -25,9 +27,13 @@ void setup()
   //smooth(8);
     
   horizonSourceA = loadImage("assets/perlin-A3.png");
+  horizonSourceFG1 = loadImage("assets/db-L.png");
+  horizonSourceFG2 = loadImage("assets/db-R.png");
   
   horizonShader = loadShader("assets/horizonA.glsl");
   horizonShader.set("horizon_src_tex", horizonSourceA);
+  horizonShader.set("horizon_fg1_tex", horizonSourceFG1);
+  horizonShader.set("horizon_fg2_tex", horizonSourceFG2);
   horizonShader.set("resolution", 1280, 720);
   horizonShader.set("lightener", 0.07);
   
@@ -89,7 +95,8 @@ void draw()
   
   //hex_center_x = hex_radius * cos(2*PI*t) * 0.5;
   //hex_center_y = hex_radius * sin(2*PI*t) * 0.5;
-  
+  hex_center_y = -(t % 1.0) * hex_apothem * 2;
+
   pg.beginDraw();
   
   pg.clear();
