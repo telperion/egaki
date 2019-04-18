@@ -5,7 +5,7 @@ PImage horizonSourceFG1;
 PImage horizonSourceFG2;
 PShader horizonShader;
 
-boolean saving = false;
+boolean saving = true;
 float frameRateDesired = 60;
 float frameLoopLength  = 30;    // seconds
 
@@ -23,21 +23,21 @@ void Init()
 void setup()
 {  
   frameRate(frameRateDesired);
-  size(1280, 720, P3D);
+  size(960, 540, P3D);
   //smooth(8);
     
   horizonSourceA = loadImage("assets/perlin-A3.png");
-  horizonSourceFG1 = loadImage("assets/db-L.png");
-  horizonSourceFG2 = loadImage("assets/db-R.png");
+  horizonSourceFG1 = loadImage("assets/bigstock-W-C.png");
+  horizonSourceFG2 = loadImage("assets/bigstock-W-B.png");
   
   horizonShader = loadShader("assets/horizonA.glsl");
   horizonShader.set("horizon_src_tex", horizonSourceA);
   horizonShader.set("horizon_fg1_tex", horizonSourceFG1);
   horizonShader.set("horizon_fg2_tex", horizonSourceFG2);
-  horizonShader.set("resolution", 1280, 720);
+  horizonShader.set("resolution", 960, 540);
   horizonShader.set("lightener", 0.07);
   
-  pg = createGraphics(1280, 720, P3D);
+  pg = createGraphics(960, 540, P3D);
   
   Init();
 }

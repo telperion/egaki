@@ -22,7 +22,7 @@ uniform float t_samples = 5.0;
 
 vec2 pix_size = vec2(12.0, 1.0);
 uniform float aspect_sq = 16.0/9.0;        // iResolution.x/iResolution.y
-uniform float max_height = 0.9;
+uniform float max_height = 1.2;
 uniform float aurora_speed = 0.5;
 uniform float aurora_submerge = -0.15;
 uniform float aurora_dim = 2.0;
@@ -216,7 +216,7 @@ void main()
     // Output to screen
     vec4 almost = vec4(pow(color_sum.rgb, vec3(gamma)), color_sum.a);
     vec4 tex_fg1 = texture2D(horizon_fg1_tex, vec2(pq.x, 1.0-pq.y));
-    vec4 tex_fg2 = texture2D(horizon_fg2_tex, vec2(pq.x, 1.0-pq.y));
+    vec4 tex_fg2 = texture2D(horizon_fg2_tex, vec2(1.0-pq.x, 1.0-pq.y));
     float alight = treelight + (1.0-treelight) * pow(grey(almost.rgb), 0.5);
 
     gl_FragColor = vec4(
