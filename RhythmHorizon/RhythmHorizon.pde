@@ -1,3 +1,7 @@
+int MAX_STARS = 300;
+float MAX_STAR_SIZE = 0.01;
+float MAX_STAR_WANDER = 0.02;
+
 PGraphics pg;
 
 PImage horizonSourceA;
@@ -5,25 +9,85 @@ PImage horizonSourceFG1;
 PImage horizonSourceFG2;
 PShader horizonShader;
 
-boolean saving = true;
+boolean saving = false;
 float frameRateDesired = 60;
-float frameLoopLength  = 30;    // seconds
+float frameLoopLength  = 120;    // seconds
+
+float star_loop = 0.2;
 
 float hex_center_x = 0.0;
 float hex_center_y = 0.0;
-float hex_radius = 90.0;
+float hex_radius = 128.0;
 float hex_apothem = 0.5*sqrt(3.0)*hex_radius;
 float hex_minipothem = hex_radius/sqrt(3.0);
 
+class Star
+{
+  public float x;           // pixels
+  public float y;           // pixels
+  public float size;        // pixels
+  public float scp;         // [0, 1] - scaling parameter in proportion of `size`
+  public float shift_arg;   // [0, 2*pi) - shifting direction
+  public float shift_magn;  // pixels
+  public float shp;         // [-0.5, 0.5] - shifting parameter in proportion of `shift_magn`
+  
+  public Star()
+  {
+    float wh = sqrt(width*height);
+    
+    x = random(1)*width;
+    y = random(1)*height;
+    size = random(wh*MAX_STAR_SIZE * 0.2, wh*MAX_STAR_SIZE);
+    shift_arg = random(TWO_PI);
+    shift_magn = random(wh*MAX_STAR_WANDER * 0.2, wh*MAX_STAR_WANDER);
+    
+    scp = random(1);
+    shp = random(1);
+  }
+  
+  public void PrepareDraw(PGraphics context)
+  {
+    context.stroke(0, 85, 0);
+    context.fill(0, 255, 0);
+    context.strokeWeight(1);
+    context.blendMode(ADD);
+  }
+  
+  public void Draw(PGraphics context, float t)
+  {
+    float sct =(sin((scp + t) * TWO_PI) - 0.8) / 0.2;
+    float sht = sin((shp + t) * TWO_PI) * shift_magn;
+    
+    sct = (sct < 0.0) ? 0.0 : sct;
+    
+    float b = size * (sct*sct) * (1.0 - y/height);
+    float h = size * sqrt(sct) * (1.0 - y/height);
+        
+    context.pushMatrix();
+      context.translate(x + sht*cos(shift_arg), y + sht*sin(shift_arg), 0);
+      context.triangle( 0.5*b,  0, -0.5*b,  0,  0,  h);
+      context.triangle( 0, -0.5*b,  0,  0.5*b, -h,  0);
+      context.triangle(-0.5*b,  0,  0.5*b,  0,  0, -h);
+      context.triangle( 0,  0.5*b,  0, -0.5*b,  h,  0);
+    context.popMatrix();
+  }
+}
+Star stars[];
+
 void Init()
 { 
+  stars = new Star[MAX_STARS];
+  for (int i = 0; i < MAX_STARS; i++)
+  {
+    stars[i] = new Star();
+  }
 }
 
 
 void setup()
 {  
   frameRate(frameRateDesired);
-  size(960, 540, P3D);
+  size(1440, 810, P3D);
   //smooth(8);
     
   horizonSourceA = loadImage("assets/perlin-A3.png");
@@ -34,10 +98,10 @@ void setup()
   horizonShader.set("horizon_src_tex", horizonSourceA);
   horizonShader.set("horizon_fg1_tex", horizonSourceFG1);
   horizonShader.set("horizon_fg2_tex", horizonSourceFG2);
-  horizonShader.set("resolution", 960, 540);
+  horizonShader.set("resolution", width, height);
   horizonShader.set("lightener", 0.07);
   
-  pg = createGraphics(960, 540, P3D);
+  pg = createGraphics(width, height, P3D);
   
   Init();
 }
@@ -106,14 +170,19 @@ void draw()
   pg.strokeJoin(ROUND);
   pg.strokeCap(ROUND);
   
-  pg.stroke(127);
+  pg.stroke(51, 0, 0);
   DrawHexInternals(pg);
-  pg.stroke(255);
+  pg.stroke(153, 0, 0);
   DrawHexSpurs(pg);
+    
+  stars[0].PrepareDraw(pg);
+  for (int i = 0; i < MAX_STARS; i++)
+  {
+    stars[i].Draw(pg, (t/star_loop) % 1.0);
+  }
   
   horizonShader.set("time", t);
   pg.filter(horizonShader);
-  
   
   pg.endDraw();
   

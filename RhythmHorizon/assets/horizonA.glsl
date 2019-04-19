@@ -17,13 +17,13 @@ uniform vec2 resolution = vec2(1280.0, 720.0);
 varying vec4 vertColor;
 varying vec4 vertTexCoord;
 
-uniform float t_loop = 0.5;
+uniform float t_loop = 1.0;
 uniform float t_samples = 5.0;
 
-vec2 pix_size = vec2(12.0, 1.0);
+vec2 pix_size = vec2(16.0, 1.0);
 uniform float aspect_sq = 16.0/9.0;        // iResolution.x/iResolution.y
-uniform float max_height = 1.2;
-uniform float aurora_speed = 0.5;
+uniform float max_height = 1.0;
+uniform float aurora_speed = 1.0;
 uniform float aurora_submerge = -0.15;
 uniform float aurora_dim = 2.0;
 uniform float max_gamma = 3.0;
@@ -34,6 +34,8 @@ uniform vec2 hex_center = vec2(0.0, 0.0);
 uniform float hex_radius = 0.2;
 uniform float hex_thk = 0.01;
 uniform float hex_strength = 0.02;
+
+uniform float star_strength = 1.0;
 
 const vec4 greyscaler = vec4(0.299, 0.587, 0.114, 0);
 
@@ -204,23 +206,27 @@ void main()
     vec4 texH = texture2D(horizon_src_tex, vec2(uv.x, mod(aurora_speed * t, 1.0)));
     vec4 texV = texture2D(horizon_src_tex, vec2(mod(aurora_speed * t, 1.0), uv.x));
     vec4 texG = texture2D(texture, pq);
+    vec4 tex_fg1 = texture2D(horizon_fg1_tex, vec2(pq.x, 1.0-pq.y));
+    vec4 tex_fg2 = texture2D(horizon_fg2_tex, vec2(1.0-pq.x, 1.0-pq.y));
 
-    gamma = 1.0 - lightener * grey(texG.rgb);
+    gamma = 1.0 - lightener * dot(texG.rgb, vec3(1.0));
     
     vec4 pal = PalettePick((0.5 * (uv.y + aurora_submerge) / grey(texH.rgb) + grey(texV.rgb)) / max_height, hsv_blend);
     pal.rgb *= 1.0 - aurora_dim*grey(texV.rgb) * (1.0 + clamp(aurora_submerge + uv.y, -1.0, 0.0));
     vec4 col = vec4(vec3(0.0), 1.0); //texture(iChannel1, pq);
+
+    float star_show = texG.g * (1.0 - tex_fg1.a) * (1.0 - tex_fg2.a);
     
-    vec4 color_sum = vec4(pal.rgb * pal.a + col.rgb * (1.0 - pal.a) + texG.rgb * hex_strength, clamp(col.a + pal.a + grey(texG.rgb)*hex_strength, 0.0, 1.0));
+    vec4 color_sum = vec4(pal.rgb * pal.a + col.rgb * (1.0 - pal.a), clamp(col.a + pal.a, 0.0, 1.0));
+    vec4 color_hexed = vec4(color_sum.rgb + texG.r * hex_strength, clamp(color_sum.a + texG.r * hex_strength, 0.0, 1.0));
+    vec4 color_starred = vec4(clamp(color_hexed.rgb + star_strength * star_show * (1.0 - pal.a), 0.0, 1.0), clamp(color_hexed.a + star_show, 0.0, 1.0));
     
     // Output to screen
-    vec4 almost = vec4(pow(color_sum.rgb, vec3(gamma)), color_sum.a);
-    vec4 tex_fg1 = texture2D(horizon_fg1_tex, vec2(pq.x, 1.0-pq.y));
-    vec4 tex_fg2 = texture2D(horizon_fg2_tex, vec2(1.0-pq.x, 1.0-pq.y));
+    vec4 almost = vec4(pow(color_starred.rgb, vec3(gamma)), color_starred.a);
     float alight = treelight + (1.0-treelight) * pow(grey(almost.rgb), 0.5);
 
     gl_FragColor = vec4(
-        almost.rgb * (1.0 - tex_fg1.a) * (1.0 - tex_fg2.a) * color_sum.a
+        almost.rgb * (1.0 - tex_fg1.a) * (1.0 - tex_fg2.a) * color_starred.a
         + pow(tex_fg1.rgb, vec3(2.0)) * tex_fg1.a * (1.0 - tex_fg2.a) * (0.5 + 0.5*almost.rgb) * treelight
         + pow(tex_fg2.rgb, vec3(2.0)) * tex_fg2.a * alight,
         1.0);
