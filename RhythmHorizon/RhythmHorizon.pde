@@ -9,7 +9,7 @@ PImage horizonSourceFG1;
 PImage horizonSourceFG2;
 PShader horizonShader;
 
-boolean saving = false;
+boolean saving = true;
 float frameRateDesired = 60;
 float frameLoopLength  = 120;    // seconds
 
