@@ -39,11 +39,11 @@ class C4
   }
 }
 
-float butt_wingRotateMin = -10;    // degrees
+float butt_wingRotateMin = -20;    // degrees
 float butt_wingRotateMax =  70;    // degrees
-float butt_wingPeriod = 12;        // time units
-float butt_wingFlaps = 6;          // wing flap cycles
-float butt_wingTravel = 0.8;       // effect of flapping on apparent speed
+float butt_wingPeriod = 6;        // time units
+float butt_wingFlaps = 4.5;          // wing flap cycles
+float butt_wingTravel = 1.5;       // effect of flapping on apparent speed
 float butt_loopDistance = 1000;    // from -LD/2 to +LD/2 in one T
 float butt_upward = 0.2;           // z change vs. y
 
@@ -104,8 +104,21 @@ class Butt
     float alpha = 1 - pow(2*pth-1, 6);
     
     //pg.noStroke();
-    pg.stroke(255, 153 + 102*pos.z/butt_loopDistance, 255 - 153*pth, 170 * alpha);
-    pg.fill(204, 102 + 51*pos.z/butt_loopDistance, 204 - 153*pth, 85 * alpha);
+    //pg.stroke(255, 153 + 102*pos.z/butt_loopDistance, 255 - 153*pth, 170 * alpha);
+    //pg.fill(204, 102 + 51*pos.z/butt_loopDistance, 204 - 153*pth, 85 * alpha);
+    
+    pg.stroke(
+      col[0].r + (col[2].r - col[0].r) * pth,
+      col[0].g + (col[2].g - col[0].g) * pth,
+      col[0].b + (col[2].b - col[0].b) * pth,
+      170 * alpha
+      );
+    pg.fill(
+      col[1].r + (col[2].r - col[1].r) * pth,
+      col[1].g + (col[2].g - col[1].g) * pth,
+      col[1].b + (col[2].b - col[1].b) * pth,
+      85 * alpha
+      );
     pg.strokeWeight(0.06);
     pg.strokeJoin(BEVEL);
     
