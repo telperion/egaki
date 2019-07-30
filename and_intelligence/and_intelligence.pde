@@ -24,8 +24,8 @@ Butt MakeButt()
   b.shape = random(1);
   
   b.pos.x = butt_loopDistance*randomGaussian();
-  b.pos.y = butt_loopDistance*(randomGaussian()*0.3 + 0.3);
-  b.pos.z = butt_loopDistance*(randomGaussian()     + 0.0);
+  b.pos.y = butt_loopDistance*(randomGaussian()*0.3 + 0.2);
+  b.pos.z = butt_loopDistance*(randomGaussian()     - 0.0);
   
   b.offsetPath = random(1.0);
   b.offsetFlap = random(butt_wingPeriod);
@@ -65,7 +65,7 @@ void Init()
 void setup()
 {  
   frameRate(frameRateDesired);
-  size(836, 328, P3D);
+  size(1280, 960, P3D);
   //smooth(8);
     
   intelBanner = loadImage("andintel-B2.png");
@@ -75,7 +75,7 @@ void setup()
   intelBG.set("seedTex", intelSeed);
   intelShader = loadShader("prettify.glsl");
   
-  pg = createGraphics(836, 328, P3D);
+  pg = createGraphics(1280, 960, P3D);
   
   Init();
 }
@@ -116,9 +116,9 @@ void draw()
   pg.popMatrix();
   
   pg.pushMatrix();
-    pg.scale(0.95);
-    pg.rotateY(PI *  0.010 * sin(2*PI*t));
-    pg.rotateX(PI *  0.020 * cos(2*PI*t));
+    pg.scale(0.8);
+    //pg.rotateY(PI *  0.010 * sin(2*PI*t));
+    //pg.rotateX(PI *  0.020 * cos(2*PI*t));
     
     pg.beginShape();
     pg.textureMode(NORMAL);
@@ -141,7 +141,7 @@ void draw()
     
   if (saving)
   {
-    pg.save(String.format("intel/%06d.png", frameCount));
+    pg.save(String.format("intel-b/%06d.png", frameCount));
     if (frameCount > ll)
     {
       exit();
