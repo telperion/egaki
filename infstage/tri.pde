@@ -1,9 +1,11 @@
-int w = 1080;
-int h = 720;
+int w = 960;
+int h = 540;
 
 float sq3d2 = sqrt(3.0) / 2.0;
-int _tri_W = 37;  // should be an odd number
+int _tri_W = 41;  // should be an odd number
 float _tri_spacing = 2.0 * w / float(_tri_W);    // center-to-center horizontally
+float _tri_border = 0.2;                         // inner triangle from outer triangle
+float _tri_zu = 0.01;
 int _tri_H = ceil(float(h) / (_tri_spacing * sq3d2) * 0.5) * 2 + 1;
 
 class Tri
@@ -17,7 +19,7 @@ class Tri
   
   Tri()
   {
-    sz0 = _tri_spacing;
+    sz0 = 1;
     sz1 = 0;
     tl = new float[3];
     for (int i = 0; i < 3; i++)
@@ -25,6 +27,7 @@ class Tri
       tl[i] = 0;
     }
     rot = 0;
+    col = color(0, 0, 0);
     join = false;
   }
   
@@ -38,53 +41,85 @@ class Tri
       tl[i] = o.tl[i];
     }
     rot = o.rot;
+    col = o.col;
     join = o.join;
   }
   
-  color Get(int ix, int iy)
+  void Get(int ix, int iy)
   {
-    color res;
     float s = 1 - 2 * ((ix + iy) % 2);
     
-    res = get(
+    col = get(
       int( width*0.5 + _tri_spacing*(ix                         - _tri_W/2)*0.5),
       int(height*0.5 + _tri_spacing*(sq3d2*iy + s * sq3d2 / 6.0 - _tri_H/2 + 1))
     );
-    return res;
   }
   
-  void Draw(PGraphics pg, int ix, int iy, float tween_tl, float tween_rot, float tween_sz)  
+  void Draw(PGraphics pg, int ix, int iy, float alpha, float tween_rot, float tween_sz, float tween_tl)  
   {
     // (0, 0) is a triangle pointing up at (width/2, height/2)
     float sz = sz0 + (sz1 - sz0) * tween_sz;
+    float sz_b = sz - _tri_border; sz_b = (sz_b < 0) ? 0 : sz_b;
+    color col_b = col;
+    col = color(red(col) * 0.5, green(col) * 0.5, blue(col) * 0.5);
     
+    //pg.strokeWeight(1.0 / _tri_spacing);
+        
     pg.pushMatrix();
       if ((ix + iy) % 2 != 0)
       {
+        pg.rotateZ(rot*tween_rot);
+        pg.scale(_tri_spacing);
         pg.translate(
-          tl[0]*tween_tl + _tri_spacing*ix*0.5,
-          tl[1]*tween_tl + _tri_spacing*(sq3d2*iy + sq3d2 / -6.0),
+          tl[0]*tween_tl + ix*0.5,
+          tl[1]*tween_tl + (sq3d2*iy + sq3d2 / -6.0),
           tl[2]*tween_tl
         );
-        pg.rotateZ(rot*tween_rot);
+        pg.fill(col, 255 * alpha);     
+        pg.stroke(col, 128 * alpha);
+        pg.scale(sz);
         pg.triangle(
-          sz * -0.5, sz * sq3d2 / -3.0,
-          sz *  0.5, sz * sq3d2 / -3.0,
-                0.0, sz * sq3d2 /  1.5
+          -0.5, sq3d2 / -3.0,
+           0.5, sq3d2 / -3.0,
+           0.0, sq3d2 /  1.5
+        );
+        
+        pg.translate(0, 0, _tri_zu);
+        pg.fill(col_b, 255 * alpha);     
+        pg.stroke(col_b, 128 * alpha);
+        pg.scale(sz_b);
+        pg.triangle(
+          -0.5, sq3d2 / -3.0,
+           0.5, sq3d2 / -3.0,
+           0.0, sq3d2 /  1.5
         );
       }
       else
       {
+        pg.rotateZ(rot*tween_rot);
+        pg.scale(_tri_spacing);
         pg.translate(
-          tl[0]*tween_tl + _tri_spacing*ix*0.5,
-          tl[1]*tween_tl + _tri_spacing*(sq3d2*iy + sq3d2 /  6.0),
+          tl[0]*tween_tl + ix*0.5,
+          tl[1]*tween_tl + (sq3d2*iy + sq3d2 /  6.0),
           tl[2]*tween_tl
         );
-        pg.rotateZ(rot*tween_rot);
+        pg.fill(col, 255 * alpha);     
+        pg.stroke(col, 128 * alpha);
+        pg.scale(sz);
         pg.triangle(
-          sz * -0.5, sz * sq3d2 /  3.0,
-          sz *  0.5, sz * sq3d2 /  3.0,
-                0.0, sz * sq3d2 / -1.5
+          -0.5, sq3d2 /  3.0,
+           0.5, sq3d2 /  3.0,
+           0.0, sq3d2 / -1.5
+        );
+        
+        pg.translate(0, 0, _tri_zu);
+        pg.fill(col_b, 255 * alpha);     
+        pg.stroke(col_b, 128 * alpha);
+        pg.scale(sz_b);
+        pg.triangle(
+          -0.5, sq3d2 /  3.0,
+           0.5, sq3d2 /  3.0,
+           0.0, sq3d2 / -1.5
         );
       }
     pg.popMatrix();
