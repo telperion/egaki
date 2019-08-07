@@ -2,12 +2,17 @@ PGraphics pg[];
 PGraphics blank;
 PImage ref;
 int layers = 2;
+boolean saving = true;
 
 int fps_desired = 60;
-int fpl = 300;
+int fpl = 3600;
 int loops = 4;
 
-float image_wander = 0.01;
+float layer_swell = 0.6;
+float image_wander = 0.02;
+float max_blur_radius = 0.01;
+float sigmoid_str = 3.0;
+float sigmoid_center = 0.6;
 
 Tri board[][];
 
@@ -20,12 +25,12 @@ void Init()
     {
       board[b][i] = new Tri();
       board[b][i].sz0 =  1.0;
-      board[b][i].sz1 =  0.5; // (1.0 + randomGaussian() * 0.3);
+      board[b][i].sz1 =  1.05; // (1.0 + randomGaussian() * 0.3);
       for (int j = 0; j < 3; j++)
       {
         board[b][i].tl[j] = randomGaussian() * 0.3;
       }
-      board[b][i].rot = PI * (1 - 2*b) / 60.0;
+      board[b][i].rot = PI * (1 - 2*b) / 30.0;
       board[b][i].Get(i % _tri_H, i / _tri_H);
     }
   }
@@ -46,6 +51,8 @@ void setup()
   }
   blank = createGraphics(960, 540, P3D);
   
+  colorMode(HSB);
+  
   Init();
 }
 
@@ -55,7 +62,7 @@ void draw()
   float t = (frameCount / float(fpl)) % 1;
   int layer_active = (t >= 0.5) ? 1 : 0;
   
-  image(ref, cos(2*PI*t)*min(width, height)*image_wander, sin(2*PI*t)*min(width, height)*image_wander, width, height);
+  image(ref, 0 /* cos(2*PI*t)*min(width, height)*image_wander */, cos(2*PI*t)*height*image_wander, width, height);
   loadPixels();
   background(0);
   
@@ -80,13 +87,14 @@ void draw()
     */
     
     pg[li].strokeJoin(BEVEL);
-    pg[li].strokeWeight(0.02);
+    pg[li].strokeWeight(0.05);
     
     pg[li].pushMatrix();
     
     float tb = (t * 2) % 1 * ((li == layer_active) ? 1 : 0);
+    float tt = sigtanh(tb, sigmoid_str, sigmoid_center);
     pg[li].translate(0, 0, _tri_zu*_tri_spacing*(1 + 2*li));
-    pg[li].scale(1.0 + 0.4 * tb*tb);
+    pg[li].scale(1.0 + layer_swell * tt);
     
     for (int ix = 0; ix < _tri_W; ix++)
     {
@@ -98,7 +106,7 @@ void draw()
         board[li][ii].Draw(
           pg[li],
           ix - _tri_W/2, iy - _tri_H/2,
-          (li == layer_active) ? (1-tb)*tb*4 : 1, 1-(1-tb)*(1-tb), tb*tb, 0
+          (li == layer_active) ? pow((1-tb)*tb*4,3) : 1, tt, tt, 0
         );
       }
     }
@@ -108,7 +116,7 @@ void draw()
     
     if (li == layer_active)
     {
-     // pg[li].filter(BLUR, tb*tb * 10);
+      pg[li].filter(BLUR, tt * max_blur_radius * min(width, height));
     }
     
     pg[li].endDraw(); 
@@ -120,6 +128,11 @@ void draw()
     0, 0, width, height,
     0, 0, width, height,
     DODGE);
+    
+  if (saving && (frameCount <= fpl))
+  {
+    saveFrame("frames/infstage-######.png");
+  }
   
   //print(String.format("%5d\n", frameCount));
 }

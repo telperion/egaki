@@ -53,6 +53,7 @@ class Tri
       int( width*0.5 + _tri_spacing*(ix                         - _tri_W/2)*0.5),
       int(height*0.5 + _tri_spacing*(sq3d2*iy + s * sq3d2 / 6.0 - _tri_H/2 + 1))
     );
+    //col = color(hue(col), saturation(col), 100*sigtanh(brightness(col)*0.01, 2, 0.7));
   }
   
   void Draw(PGraphics pg, int ix, int iy, float alpha, float tween_rot, float tween_sz, float tween_tl)  
@@ -61,7 +62,7 @@ class Tri
     float sz = sz0 + (sz1 - sz0) * tween_sz;
     float sz_b = sz - _tri_border; sz_b = (sz_b < 0) ? 0 : sz_b;
     color col_b = col;
-    col = color(red(col) * 0.5, green(col) * 0.5, blue(col) * 0.5);
+    col = color(hue(col), 100 - 0.45*(100 - saturation(col)), 15+0.2*brightness(col));
     
     //pg.strokeWeight(1.0 / _tri_spacing);
         

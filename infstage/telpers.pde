@@ -78,3 +78,13 @@ void rgbStroke(PGraphics pg, float[] rgb)
 {
   pg.fill(int(rgb[0]*255), int(rgb[1]*255), int(rgb[2]*255));
 }
+
+float sigtanh(float t, float a, float c)
+{
+  float d = a*(1 - 2*c);
+  float input = a*(2*t - 1);
+  float shift = (float)Math.tanh(d + input); 
+  float upper = (float)Math.tanh(d + a);
+  float lower = (float)Math.tanh(d - a);
+  return (shift - lower)/(upper - lower);
+}
