@@ -50,8 +50,8 @@ class Tri
     float s = 1 - 2 * ((ix + iy) % 2);
     
     col = get(
-      int( width*0.5 + _tri_spacing*(ix                         - _tri_W/2)*0.5),
-      int(height*0.5 + _tri_spacing*(sq3d2*iy + s * sq3d2 / 6.0 - _tri_H/2 + 1))
+      int( width*0.5 + _tri_spacing*(ix                          - _tri_W/2)*0.5),
+      int(height*0.5 + _tri_spacing*(sq3d2*iy + s * sq3d2 / -6.0 - _tri_H/2 + 1))
     );
     //col = color(hue(col), saturation(col), 100*sigtanh(brightness(col)*0.01, 2, 0.7));
   }

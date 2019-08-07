@@ -8,8 +8,8 @@ int fps_desired = 60;
 int fpl = 3600;
 int loops = 4;
 
-float layer_swell = 0.6;
-float image_wander = 0.02;
+float layer_swell = 1.0;
+float image_wander = 0.015;
 float max_blur_radius = 0.01;
 float sigmoid_str = 3.0;
 float sigmoid_center = 0.6;
@@ -62,7 +62,7 @@ void draw()
   float t = (frameCount / float(fpl)) % 1;
   int layer_active = (t >= 0.5) ? 1 : 0;
   
-  image(ref, 0 /* cos(2*PI*t)*min(width, height)*image_wander */, cos(2*PI*t)*height*image_wander, width, height);
+  image(ref, 0 /* cos(2*PI*t)*min(width, height)*image_wander */, sin(PI*(2*t+0.25))*height*image_wander, width, height);
   loadPixels();
   background(0);
   
@@ -132,7 +132,6 @@ void draw()
   if (saving && (frameCount <= fpl))
   {
     saveFrame("frames/infstage-######.png");
-  }
-  
-  //print(String.format("%5d\n", frameCount));
+    print(String.format("Saved frame %6d of %6d\n", frameCount, fpl));
+  }  
 }
