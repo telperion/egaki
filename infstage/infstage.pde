@@ -1,9 +1,13 @@
-PGraphics pg;
+PGraphics pg[];
+PGraphics blank;
 PImage ref;
+int layers = 2;
 
 int fps_desired = 60;
 int fpl = 300;
 int loops = 4;
+
+float image_wander = 0.01;
 
 Tri board[][];
 
@@ -35,7 +39,12 @@ void setup()
   ref = loadImage("res/logo3.png");
   image(ref, 0, 0, width, height);  
   
-  pg = createGraphics(960, 540, P3D);
+  pg = new PGraphics[layers];
+  for (int li = 0; li < layers; li++)
+  {
+    pg[li] = createGraphics(960, 540, P3D);
+  }
+  blank = createGraphics(960, 540, P3D);
   
   Init();
 }
@@ -44,42 +53,40 @@ void draw()
 {
   float tx = cos(2 * PI * frameCount / float(fpl)); tx = tx*tx;
   float t = (frameCount / float(fpl)) % 1;
-  
-  
-  
-  pg.beginDraw();
-  
-  
-  pg.clear();  
-  pg.background(30, 0, 0, 255);
-  //pg.background(0, 0, 0, 255 * (1 - t) * (1 - t));
-  
-  pg.translate(width/2, height/2);
-  
-  /*
-  if (frameCount < 5)
-  {
-      print(String.format("%3d, %3d\n", _tri_W, _tri_H));
-  }
-  */
-  
-  pg.strokeJoin(BEVEL);
-  pg.strokeWeight(0.02);
   int layer_active = (t >= 0.5) ? 1 : 0;
-  for (int b = 0; b < 2; b++)
+  
+  image(ref, cos(2*PI*t)*min(width, height)*image_wander, sin(2*PI*t)*min(width, height)*image_wander, width, height);
+  loadPixels();
+  background(0);
+  
+  blank.beginDraw();
+  blank.background(0);
+  blank.endDraw();
+  
+  for (int li = 0; li < layers; li++)
   {
-    pg.pushMatrix();
+    pg[li].beginDraw();    
     
-    float tb = (t * 2) % 1 * ((b == 1) ? 1 : 0);
-    pg.translate(0, 0, _tri_zu*_tri_spacing*(1 + 2*b));
-    pg.scale(1.0 + 0.4 * tb*tb);
+    pg[li].clear();
+    //pg[li].background(0, 0, 0, 0);
     
-    // Annoyingly, we have to draw the topmost layer last, no matter what
-    int b_draw = 1-b;
-    if (b == layer_active)
-    {     
-      b_draw = b;
+    pg[li].translate(width/2, height/2);
+    
+    /*
+    if (frameCount < 5)
+    {
+        print(String.format("%3d, %3d\n", _tri_W, _tri_H));
     }
+    */
+    
+    pg[li].strokeJoin(BEVEL);
+    pg[li].strokeWeight(0.02);
+    
+    pg[li].pushMatrix();
+    
+    float tb = (t * 2) % 1 * ((li == layer_active) ? 1 : 0);
+    pg[li].translate(0, 0, _tri_zu*_tri_spacing*(1 + 2*li));
+    pg[li].scale(1.0 + 0.4 * tb*tb);
     
     for (int ix = 0; ix < _tri_W; ix++)
     {
@@ -87,20 +94,32 @@ void draw()
       {
         int ii = ix*_tri_H + iy;
         
-        board[b_draw][ii].Get(ix, iy);
-        board[b_draw][ii].Draw(
-          pg,
+        board[li][ii].Get(ix, iy);
+        board[li][ii].Draw(
+          pg[li],
           ix - _tri_W/2, iy - _tri_H/2,
-          (1-tb)*(1-tb), tb*tb, tb*tb, 0
+          (li == layer_active) ? (1-tb)*tb*4 : 1, 1-(1-tb)*(1-tb), tb*tb, 0
         );
       }
     }
+      
+    pg[li].popMatrix();
+    //pg[li].triangle(0, 0, 100, 100, 200, 0);
     
-    pg.popMatrix();
+    if (li == layer_active)
+    {
+     // pg[li].filter(BLUR, tb*tb * 10);
+    }
+    
+    pg[li].endDraw(); 
   }
-  //pg.triangle(0, 0, 100, 100, 200, 0);
   
-  pg.endDraw();
-  //image(ref, tx*200, tx*200, width, height); 
-  image(pg, 0, 0);
+  image(blank, 0, 0);
+  image(pg[1 - layer_active], 0, 0);
+  blend(pg[    layer_active],
+    0, 0, width, height,
+    0, 0, width, height,
+    DODGE);
+  
+  //print(String.format("%5d\n", frameCount));
 }
