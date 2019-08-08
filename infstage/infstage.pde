@@ -11,8 +11,8 @@ int loops = 4;
 float layer_swell = 1.0;
 float image_wander = 0.015;
 float max_blur_radius = 0.01;
-float sigmoid_str = 3.0;
-float sigmoid_center = 0.6;
+float sigmoid_str = 4.0;
+float sigmoid_center = 0.7;
 
 Tri board[][];
 
@@ -25,7 +25,7 @@ void Init()
     {
       board[b][i] = new Tri();
       board[b][i].sz0 =  1.0;
-      board[b][i].sz1 =  1.05; // (1.0 + randomGaussian() * 0.3);
+      board[b][i].sz1 =  1.1; // (1.0 + randomGaussian() * 0.3);
       for (int j = 0; j < 3; j++)
       {
         board[b][i].tl[j] = randomGaussian() * 0.3;
@@ -39,7 +39,8 @@ void Init()
 void setup()
 {
   frameRate(fps_desired);
-  size(960, 540, P3D);
+  size(1280, 720, P3D);
+  smooth(3);
   
   ref = loadImage("res/logo3.png");
   image(ref, 0, 0, width, height);  
@@ -47,9 +48,9 @@ void setup()
   pg = new PGraphics[layers];
   for (int li = 0; li < layers; li++)
   {
-    pg[li] = createGraphics(960, 540, P3D);
+    pg[li] = createGraphics(1280, 720, P3D);
   }
-  blank = createGraphics(960, 540, P3D);
+  blank = createGraphics(1280, 720, P3D);
   
   colorMode(HSB);
   
@@ -62,7 +63,7 @@ void draw()
   float t = (frameCount / float(fpl)) % 1;
   int layer_active = (t >= 0.5) ? 1 : 0;
   
-  image(ref, 0 /* cos(2*PI*t)*min(width, height)*image_wander */, sin(PI*(2*t+0.25))*height*image_wander, width, height);
+  image(ref, 0 /* cos(2*PI*t)*min(width, height)*image_wander */, sin(PI*(2*t-0.25))*height*image_wander, width, height);
   loadPixels();
   background(0);
   
@@ -93,7 +94,6 @@ void draw()
     
     float tb = (t * 2) % 1 * ((li == layer_active) ? 1 : 0);
     float tt = sigtanh(tb, sigmoid_str, sigmoid_center);
-    pg[li].translate(0, 0, _tri_zu*_tri_spacing*(1 + 2*li));
     pg[li].scale(1.0 + layer_swell * tt);
     
     for (int ix = 0; ix < _tri_W; ix++)
@@ -131,7 +131,7 @@ void draw()
     
   if (saving && (frameCount <= fpl))
   {
-    saveFrame("frames/infstage-######.png");
+    saveFrame("frames-720p/infstage-######.png");
     print(String.format("Saved frame %6d of %6d\n", frameCount, fpl));
   }  
 }
