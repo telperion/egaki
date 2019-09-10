@@ -5,11 +5,13 @@ int layers = 2;
 boolean saving = true;
 
 int fps_desired = 60;
-int fpl = 3600;
+int fpl = 14400;
 int loops = 4;
+int whoosh_reps = 3;
 
+boolean enable_blur = true;
 float layer_swell = 1.0;
-float image_wander = 0.015;
+float image_wander = 0.03;
 float max_blur_radius = 0.01;
 float sigmoid_str = 4.0;
 float sigmoid_center = 0.7;
@@ -25,12 +27,12 @@ void Init()
     {
       board[b][i] = new Tri();
       board[b][i].sz0 =  1.0;
-      board[b][i].sz1 =  1.1; // (1.0 + randomGaussian() * 0.3);
+      board[b][i].sz1 =  1.15; // (1.0 + randomGaussian() * 0.3);
       for (int j = 0; j < 3; j++)
       {
         board[b][i].tl[j] = randomGaussian() * 0.3;
       }
-      board[b][i].rot = PI * (1 - 2*b) / 30.0;
+      board[b][i].rot = PI * (1 - 2*b) / 20.0;
       board[b][i].Get(i % _tri_H, i / _tri_H);
     }
   }
@@ -42,7 +44,7 @@ void setup()
   size(1280, 720, P3D);
   smooth(3);
   
-  ref = loadImage("res/logo3.png");
+  ref = loadImage("res/blue-B2.png");
   image(ref, 0, 0, width, height);  
   
   pg = new PGraphics[layers];
@@ -58,12 +60,20 @@ void setup()
 }
 
 void draw()
-{
+{    
   float tx = cos(2 * PI * frameCount / float(fpl)); tx = tx*tx;
   float t = (frameCount / float(fpl)) % 1;
-  int layer_active = (t >= 0.5) ? 1 : 0;
+  int layer_active = ((whoosh_reps*t) % 1 >= 0.5) ? 1 : 0;
   
-  image(ref, 0 /* cos(2*PI*t)*min(width, height)*image_wander */, sin(PI*(2*t-0.25))*height*image_wander, width, height);
+  float ofs_x = sin(PI*(4*t-0))*width*image_wander;
+  float ofs_y = t*height; //sin(PI*(2*t-0.25))*height*image_wander;
+  float ofs_x_mod = (ofs_x + width) % width;
+  float ofs_y_mod = (ofs_y + height) % height;
+  
+  image(ref, ofs_x_mod - width, ofs_y_mod - height, width, height);
+  image(ref, ofs_x_mod        , ofs_y_mod - height, width, height);
+  image(ref, ofs_x_mod - width, ofs_y_mod         , width, height);
+  image(ref, ofs_x_mod        , ofs_y_mod         , width, height);
   loadPixels();
   background(0);
   
@@ -92,7 +102,7 @@ void draw()
     
     pg[li].pushMatrix();
     
-    float tb = (t * 2) % 1 * ((li == layer_active) ? 1 : 0);
+    float tb = (2*whoosh_reps*t) % 1 * ((li == layer_active) ? 1 : 0);
     float tt = sigtanh(tb, sigmoid_str, sigmoid_center);
     pg[li].scale(1.0 + layer_swell * tt);
     
@@ -114,7 +124,7 @@ void draw()
     pg[li].popMatrix();
     //pg[li].triangle(0, 0, 100, 100, 200, 0);
     
-    if (li == layer_active)
+    if (enable_blur && (li == layer_active))
     {
       pg[li].filter(BLUR, tt * max_blur_radius * min(width, height));
     }
@@ -131,7 +141,7 @@ void draw()
     
   if (saving && (frameCount <= fpl))
   {
-    saveFrame("frames-720p/infstage-######.png");
+    saveFrame("frames-720p-multi/infstage-######.png");
     print(String.format("Saved frame %6d of %6d\n", frameCount, fpl));
   }  
 }

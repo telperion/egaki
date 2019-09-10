@@ -2,7 +2,7 @@ int w = 1280;
 int h = 720;
 
 float sq3d2 = sqrt(3.0) / 2.0;
-int _tri_W = 41;  // should be an odd number
+int _tri_W = 53;  // should be an odd number
 float _tri_spacing = 2.0 * w / float(_tri_W);    // center-to-center horizontally
 float _tri_border = 0.15;                        // inner triangle from outer triangle
 float _tri_zu = 0.01;
