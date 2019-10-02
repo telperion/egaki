@@ -8,7 +8,10 @@ int n_frames = 32;
 int downscale = 16;
 int bit_depth = 4;
 float gvh_weight = 0.2;
-boolean dither = true;
+boolean dither = false;
+
+int n_circles = 64;
+int n_circles_as_if = 64;
 
 color palette[];
 
@@ -24,17 +27,26 @@ void setup() {
   img_ref = loadImage("template-full-pad.png");  // Load the reference layout image into the program
   
   // Fill the palette.
-  palette = new color[bit_depth * bit_depth * bit_depth];
+  float[] hsv = new float[3];
+  float[] rgb = new float[3];
+  palette = new color[bit_depth * bit_depth + 2];
   for (int rr = 0; rr < bit_depth; rr++)
   {
     for (int gg = 0; gg < bit_depth; gg++)
     {
-      for (int bb = 0; bb < bit_depth; bb++)
-      {
-        palette[((bb * bit_depth + gg) * bit_depth + rr)] = color(255*rr / (bit_depth-1), 255*gg / (bit_depth-1), 255*bb / (bit_depth-1));
-      }
+      hsv[0] = (rr / float(bit_depth-1) * 1.0 + 3.5) / 6.0;
+      hsv[1] =  1.0; 
+      hsv[2] =  0.1 + gg / float(bit_depth-1) * 0.8;
+      HSV2RGB(hsv, rgb);
+      palette[rr * bit_depth + gg] = color(
+        255*rgb[0],
+        255*rgb[1],
+        255*rgb[2]
+      );
     }
-  }  
+  }
+  palette[bit_depth * bit_depth + 0] = color(  0,   0,   0, 255);
+  palette[bit_depth * bit_depth + 1] = color(255, 255, 255, 255);
 }
 
 void draw() {
@@ -43,18 +55,38 @@ void draw() {
   // Y position = palette matching by grey (top) vs. hue (bottom)
   
   
-  // Draw ya shit.
   pg_draw.beginDraw();
+  // Draw ya shit.
+  pg_draw.fill(0);
+  pg_draw.noStroke();
+  pg_draw.rect(0, 0, pg_draw.width, pg_draw.height);
+  float diag = sqrt(pg_draw.width*pg_draw.width + 4*pg_draw.height*pg_draw.height);
+  
+  for (int i = 0; i < n_circles; i++)
+  { 
+    float t = (float(i)/n_circles_as_if + frameCount / float(n_frames)) % 1.0;
+    pg_draw.fill(int(255 * (1 - t)*(1 - t)));
+    float r = float(n_circles-i) / n_circles;
+    float radius = diag * sqrt(r);
+    pg_draw.circle(0.5*pg_draw.width, 0, radius);
+  }
+  
   for (int y = 0; y < pg_draw.height; y++)
   {
     for (int x = 0; x < pg_draw.width; x++)
     {
+      /*
       color c = img_test.get(
         int(x * img_test.width /pg_draw.width ),
         int(y * img_test.height/pg_draw.height)
         );
-      int i_pal = find_closest_color(palette, c, mouseY/float(height), (x+y) % 2 == 1);
-      pg_draw.set(x, y, palette[i_pal]);
+      */
+      color c = pg_draw.get(x, y);      
+      
+      int i_pal = find_closest_color(palette, c, gvh_weight, dither && ((x+y) % 2 == 1)); // mouseY/float(height)
+      c = palette[i_pal];      
+      
+      pg_draw.set(x, y, c);
     }
   }
   // <Draw stuff here>
@@ -66,7 +98,7 @@ void draw() {
   pg_save.beginDraw();
   pg_save.fill(0);
   pg_save.noStroke();
-  pg_save.rect(0, 0, pg_save.width, pg_save.width);
+  pg_save.rect(0, 0, pg_save.width, pg_save.width);  // intentional
   for (int r = 0; r < 3; r++)
   {
     for (int c = 0; c < 3; c++)
@@ -94,7 +126,7 @@ void draw() {
   
   if (frameCount <= n_frames)
   {
-    String frameName = String.format("frames/%02d (30ms) (replace).png", frameCount);
+    String frameName = String.format("frames/%02d (100ms) (replace).png", n_frames - frameCount);
     pg_save.save(frameName);
     print("Saved frame " + frameName + "\n");
   }
