@@ -5,19 +5,33 @@
  */
 
 int[][] base = {
-  {-2,  1,  1},
-  {-1, -2,  1},
-  {-1, -1, -2},
-  {-1,  2, -1},
-  { 2,  1, -1},
-  { 1, -2, -1},
-  { 1, -1,  2},
-  { 1,  2,  1}
+  {-1,  1,  1},
+  {-1, -1,  1},
+  {-1, -1, -1},
+  {-1,  1, -1},
+  { 1,  1, -1},
+  { 1, -1, -1},
+  { 1, -1,  1},
+  { 1,  1,  1}
+};
+
+int[][] rot90s = {
+  // x, then y, then z.
+  {1, 0, -1},
+  {0, 1, 1},
+  {0, 0, 0},
+  {1, 1, 0},
+  {1, -1, 0},
+  {0, 0, 0},
+  {0, -1, -1},
+  {1, 0, 1}
 };
 
 int frame_test = 100;
 float scalar = 120;
 float[][] base_scaled;
+
+float[][] pt;
 
 
 float find_flattener(float[] v, int r_dim, int t_dim)
@@ -118,6 +132,12 @@ void setup()
   {
     base_scaled[i] = new float[3];
   }
+  
+  pt = new float[3][];
+  for (int i = 0; i < 3; i++)
+  {
+    pt[i] = new float[3];
+  }
 }
 
 void draw()
@@ -131,11 +151,11 @@ void draw()
     
     stroke(1.0, 0.0, 1.0, 0.5);
     fill(  1.0, 0.0, 1.0, 0.2);
-    box(240);
+    box(60);
     
     pushMatrix();
       translate(120, 120, 120);
-      box(60);
+      box(30);
     popMatrix();
     
     
@@ -143,16 +163,72 @@ void draw()
     {
       for (int j = 0; j < 3; j++)
       {
-        base_scaled[i][j] = scalar * (base[i][j] + 0.7*sin((7*i + 3*j - 11)*frameCount*PI/3000));
+        base_scaled[i][j] = scalar * base[i][j];
       }
     }
     
-    for (int i = 0; i < 7; i++)
+    for (int i = 0; i < 8; i++)
     {
-      stroke(i/7.0, 1.0, 1.0, 1.0);
-      fill(  i/7.0, 1.0, 1.0, 0.5);
-      
-      cx(base_scaled[i], base_scaled[i+1], base_scaled[(i+2)%8], 20);
+      pushMatrix();
+        /*
+        translate(base_scaled[i][0], base_scaled[i][1], base_scaled[i][2]);
+        rotateZ(HALF_PI * rot90s[i][2]);
+        rotateY(HALF_PI * rot90s[i][1]);
+        rotateX(HALF_PI * rot90s[i][0]);
+        scale(0.5);
+        */
+        
+        for (int j = 0; j < 7; j++)
+        {
+          stroke((i + j/8.0)/8.0, 1.0, 1.0, 1.0);
+          fill(  (i + j/8.0)/8.0, 1.0, 1.0, 0.5);
+          
+          for (int k = 0; k < 3; k++)
+          {
+            for (int h = 0; h < 3; h++)
+            {
+              pt[k][h] = base_scaled[(j+k)%8][h] * 0.5;
+            }
+            for (int h = 0; h < 3; h++)
+            {
+              rotate_by(pt[k], pt[k], h, rot90s[i][h] * HALF_PI);
+            }
+            for (int h = 0; h < 3; h++)
+            {
+              pt[k][h] += base_scaled[i][h];
+            }            
+          }
+        
+          cx(pt[0], pt[1], pt[2], 20);
+        }
+        
+        // Connector (last point of i, first two points of i+1)
+        if (i < 7)
+        {
+          stroke((i + 1.0)/8.0, 1.0, 1.0, 1.0);
+          fill(  (i + 1.0)/8.0, 1.0, 1.0, 0.5);
+          
+          for (int k = 0; k < 3; k++)
+          {
+            int k_up = (k > 0) ? 1 : 0;
+            
+            for (int h = 0; h < 3; h++)
+            {
+              pt[k][h] = base_scaled[(7+k)%8][h] * 0.5;
+            }
+            for (int h = 0; h < 3; h++)
+            {
+              rotate_by(pt[k], pt[k], h, rot90s[i + k_up][h] * HALF_PI);
+            }
+            for (int h = 0; h < 3; h++)
+            {
+              pt[k][h] += base_scaled[i + k_up][h];
+            }            
+          }
+        
+          cx(pt[0], pt[1], pt[2], 20);
+        }
+      popMatrix();
     }
   popMatrix();
   
