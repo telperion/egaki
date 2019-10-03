@@ -27,8 +27,10 @@ int[][] rot90s = {
   {1, 0, 1}
 };
 
-int frame_test = 100;
-float scalar = 120;
+int iterations = 5;
+int frame_test = -1;
+int frame_test_backup = -1;
+float scalar = 360;
 float[][] base_scaled;
 
 float[][] pt;
@@ -45,12 +47,20 @@ float find_flattener(float[] v, int r_dim, int t_dim)
   
   float ang = -atan2(v[d1], v[d2]);
   
-  if (frameCount == frame_test)
+  if (frameCount == frame_test_backup)
   {
     println(String.format("{%8.3f, %8.3f, %8.3f} rot %d against %d: %6.3f", v[0], v[1], v[2], r_dim, t_dim, ang));
   }
   
   return ang;
+}
+
+void scale_by(float[] t, float s)
+{
+  for (int i = 0; i < 3; i++)
+  {
+    t[i] *= s;
+  }
 }
 
 void rotate_by(float[] v, float[] w, int r_dim, float ang)
@@ -61,7 +71,7 @@ void rotate_by(float[] v, float[] w, int r_dim, float ang)
   float rc = cos(ang);
   float rs = sin(ang);
   
-  if (frameCount == frame_test)
+  if (frameCount == frame_test_backup)
   {
     print(String.format("{%8.3f, %8.3f, %8.3f}", v[0], v[1], v[2]));
   }
@@ -72,7 +82,7 @@ void rotate_by(float[] v, float[] w, int r_dim, float ang)
   w[d1] = w_d1_temp;
   w[d2] = w_d2_temp;
   
-  if (frameCount == frame_test)
+  if (frameCount == frame_test_backup)
   {
     println(String.format(": %d rot %6.3f -> {%8.3f, %8.3f, %8.3f}", r_dim, ang, w[0], w[1], w[2]));
   }
@@ -107,7 +117,7 @@ void cx(float[] a, float[] b, float[] p, float thk)
   
   float rot_z = find_flattener(q_rotating, 2, 1);
   // No need to actually turn this one.
-  if (frameCount == frame_test)
+  if (frameCount == frame_test_backup)
   {
     println("");
   }
@@ -122,9 +132,57 @@ void cx(float[] a, float[] b, float[] p, float thk)
   popMatrix();  
 }
 
+
+/*
+ * consider index 2.5.6
+ * within the top level there are 8 replications in order around the tracing path
+ * so this item is in rep 6 (3rd level nesting) of rep 5 (2nd level) of rep 2 (1st) 
+ * store in zero-indexed octal, i.e. 0o145
+ */
+
+float scale_iter = 0.5;
+void hilburp(int level, int indexing, float t[])
+{
+  if (level == 0)
+  {
+    for (int i = 0; i < 3; i++)
+    {
+      t[i] = 0;
+    }
+    if (frameCount == frame_test)
+    {
+      println(String.format("0x%04X: Initializing", indexing));
+    }
+    return;
+  }
+  
+  hilburp(level - 1, indexing, t);
+  
+  int rep = (indexing >> 3*(level - 1)) % 8;  
+  for (int i = 0; i < 3; i++)
+  {
+    t[i] *= scale_iter;
+  }
+  for (int i = 0; i < 3; i++)
+  {
+    rotate_by(t, t, i, rot90s[rep][i] * HALF_PI);
+  }
+  for (int i = 0; i < 3; i++)
+  {
+    t[i] += base[rep][i];
+  }
+  
+  if (frameCount == frame_test)
+  {
+    println(String.format("0x%04X: Level %d: {%6.3f, %6.3f, %6.3f}", indexing, level, t[0], t[1], t[2]));
+  }
+}
+
+
+
 void setup()
 {
-  size(1280, 720, P3D);
+  size(720, 720, P3D);
   colorMode(HSB, 1.0);
   
   base_scaled = new float[base.length][];
@@ -158,82 +216,31 @@ void draw()
       box(30);
     popMatrix();
     
-    
-    for (int i = 0; i < base.length; i++)
+    int seg_count = 1;
+    for (int i = 0; i < iterations; i++)
     {
-      for (int j = 0; j < 3; j++)
-      {
-        base_scaled[i][j] = scalar * base[i][j];
-      }
+      seg_count <<= 3;
     }
     
-    for (int i = 0; i < 8; i++)
+    for (int index = 0; index < seg_count - 1; index++)
     {
-      pushMatrix();
-        /*
-        translate(base_scaled[i][0], base_scaled[i][1], base_scaled[i][2]);
-        rotateZ(HALF_PI * rot90s[i][2]);
-        rotateY(HALF_PI * rot90s[i][1]);
-        rotateX(HALF_PI * rot90s[i][0]);
-        scale(0.5);
-        */
-        
-        for (int j = 0; j < 7; j++)
-        {
-          stroke((i + j/8.0)/8.0, 1.0, 1.0, 1.0);
-          fill(  (i + j/8.0)/8.0, 1.0, 1.0, 0.5);
-          
-          for (int k = 0; k < 3; k++)
-          {
-            for (int h = 0; h < 3; h++)
-            {
-              pt[k][h] = base_scaled[(j+k)%8][h] * 0.5;
-            }
-            for (int h = 0; h < 3; h++)
-            {
-              rotate_by(pt[k], pt[k], h, rot90s[i][h] * HALF_PI);
-            }
-            for (int h = 0; h < 3; h++)
-            {
-              pt[k][h] += base_scaled[i][h];
-            }            
-          }
-        
-          cx(pt[0], pt[1], pt[2], 20);
-        }
-        
-        // Connector (last point of i, first two points of i+1)
-        if (i < 7)
-        {
-          stroke((i + 1.0)/8.0, 1.0, 1.0, 1.0);
-          fill(  (i + 1.0)/8.0, 1.0, 1.0, 0.5);
-          
-          for (int k = 0; k < 3; k++)
-          {
-            int k_up = (k > 0) ? 1 : 0;
-            
-            for (int h = 0; h < 3; h++)
-            {
-              pt[k][h] = base_scaled[(7+k)%8][h] * 0.5;
-            }
-            for (int h = 0; h < 3; h++)
-            {
-              rotate_by(pt[k], pt[k], h, rot90s[i + k_up][h] * HALF_PI);
-            }
-            for (int h = 0; h < 3; h++)
-            {
-              pt[k][h] += base_scaled[i + k_up][h];
-            }            
-          }
-        
-          cx(pt[0], pt[1], pt[2], 20);
-        }
-      popMatrix();
+      float h = (pow(2.0, iterations) * float(index) / float(seg_count - 1)) % 1.0;
+      stroke(h, 1.0, 1.0, 1.0);
+      fill(  h, 1.0, 1.0, 0.8);
+      
+      hilburp(iterations,  index,                pt[0]);
+      hilburp(iterations,  index+1,              pt[1]);
+      hilburp(iterations, (index+2) % seg_count, pt[2]);
+      for (int i = 0; i < 3; i++)
+      {
+        scale_by(pt[i], scalar);
+      }
+      cx(pt[0], pt[1], pt[2], 4);
     }
   popMatrix();
-  
-  if (frameCount == 1000)
-  {
-    save("lol.png");
-  }
+}
+
+void mouseClicked()
+{
+  save(String.format("lol-%04d%02d%02d-%02d%02d%02d.png", year(), month(), day(), hour(), minute(), second()));
 }
