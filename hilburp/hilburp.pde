@@ -182,7 +182,7 @@ void hilburp(int level, int indexing, float t[])
 
 void setup()
 {
-  size(720, 720, P3D);
+  size(768, 768, P3D);
   colorMode(HSB, 1.0);
   
   base_scaled = new float[base.length][];
