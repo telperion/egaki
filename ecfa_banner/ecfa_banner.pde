@@ -8,9 +8,9 @@ int block = 14;
 int fc = 0;
 int f_skip = 0;
 float t_ofs = 3.0;
-float nominal_rate = 30;
+float nominal_rate = 5;
 float t_start = 0;
-float t_finish = 5;
+float t_finish = 1;
 float bpm = 136;
 
 int splits = 3;
@@ -74,7 +74,7 @@ void setup() {
 // sequence and after the last line is read, the first 
 // line is executed again.
 void draw() {  
-  float t = float(frameCount) / nominal_rate;
+  float t = float(frameCount-1) / nominal_rate;
   
   if (frameCount >= nominal_rate * t_start)
   {
@@ -115,7 +115,7 @@ void draw() {
     pg_text.fill(255, 153, 230, 102);
     star(pg_text, 0, 0, 2400, 48, glints);    
     pg_text.popMatrix();
-    //pg_text.filter(BLUR, 6);
+    pg_text.filter(BLUR, 6);
     
     pg_text.pushMatrix();
     pg_text.translate(960, 1920);
@@ -133,10 +133,10 @@ void draw() {
     
     
     
-    saveFrame(String.format("frames/banner-%02d/######.jpg", block));
+    saveFrame(String.format("frames/%02d-######.png", block));
   }
   
-  println(String.format("[%13.6f sec.] %6d: %5.3f, %d", float(millis()) / 1000, frameCount, ease3(t/t_finish), f_skip));
+  println(String.format("[%13.6f sec.] %6d: %5.3f, %d", float(millis()) / 1000, frameCount-1, ease3(t/t_finish), f_skip));
   
   if (frameCount > nominal_rate * t_finish)
   {
