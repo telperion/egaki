@@ -14,7 +14,7 @@ float t_finish = 1;
 float bpm = 136;
 
 int splits = 3;
-int glints = 4;
+int glints = 0;
 
 void star(PGraphics pg, float x, float y, float radius1, float radius2, int npoints) {
   float angle = TWO_PI / npoints;
@@ -44,13 +44,13 @@ float ease5(float p)
 // The statements in the setup() function 
 // execute once when the program begins
 void setup() {
-  size(1024, 400, P2D);  // Size must be the first statement
+  size(1280, 960, P2D);  // Size must be the first statement
   smooth(2);
-  pg_text = createGraphics(1024, 400);
+  pg_text = createGraphics(1280, 960);
   pg_text.smooth(2);
   frameRate(60);
   
-  img = loadImage(String.format("C:\\Users\\telpi\\Pictures\\ECFA 2021\\ECFA2021-banner-%02ds.png", block));
+  img = loadImage("assets/ECFA2021-darkmode-2.png");
   
   t_ofs = block*0.5;
   
@@ -102,7 +102,7 @@ void draw() {
     rect(0, 0, width, height);
     
     
-    blend(img, 0, 0, width, height, 0, 0, width, height, SCREEN);
+    blend(img, 0, 0, width, height, 0, 0, width, height, BLEND);
     
     
     pg_text.beginDraw();
@@ -133,7 +133,7 @@ void draw() {
     
     
     
-    saveFrame(String.format("frames/%02d-######.png", block));
+    saveFrame(String.format("frames/%02d/######.png", block));
   }
   
   println(String.format("[%13.6f sec.] %6d: %5.3f, %d", float(millis()) / 1000, frameCount-1, ease3(t/t_finish), f_skip));
